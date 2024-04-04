@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('to_read_comics', function (Blueprint $table) {
             $table->id();
-            $table->string('username')->unique();
-            $table->string('password'); // In reality, this would be a hashed value
-            $table->string('email')->unique();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('comic_id');
+            $table->dateTime('added_date');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('comic_id')->references('id')->on('comics');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('to_read_comics');
     }
 };
