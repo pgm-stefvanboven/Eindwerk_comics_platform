@@ -4,7 +4,7 @@
         <div class="comic-cards">
             <h1>Marvel Comics</h1>
             <div v-if="isLoggedIn" class="username">
-                Ingelogd als: {{ username }}
+                Welkom: {{ username }}
             </div>
             <div class="comic-list">
                 <div v-for="comic in comics" :key="comic.id" class="comic-card">
@@ -45,11 +45,23 @@ export default {
                 });
         },
         checkLoginStatus() {
-            axios.get('/user') // Endpoint om de ingelogde gebruiker op te halen
+            const accessToken = localStorage.getItem('accessToken');
+            if (accessToken) {
+                // Als er een toegangstoken wordt gevonden, ga ervan uit dat de gebruiker is ingelogd
+                this.isLoggedIn = true;
+                // Je kunt ervoor kiezen om andere gebruikersgegevens op te halen en in te stellen, zoals de gebruikersnaam
+                // In dit voorbeeld stel ik alleen de inlogstatus in
+                return;
+            }
+
+            // Als er geen toegangstoken wordt gevonden, controleer dan via het gebruikersendpoint
+            axios.get('/user')
                 .then(response => {
                     if (response.data) {
-                        this.isLoggedIn = true;
+                        this.isLoggedIn = true; // Gebruiker is ingelogd
                         this.username = response.data.username; // Gebruikersnaam ophalen uit de respons
+                    } else {
+                        this.isLoggedIn = false; // Gebruiker is niet ingelogd
                     }
                 })
                 .catch(error => {
