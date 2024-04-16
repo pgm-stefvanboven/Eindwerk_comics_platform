@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,12 +18,20 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('index');
 })->middleware(['auth', 'verified'])
-  ->name('dashboard');
+    ->name('index');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])
-  ->name('dashboard');
+    ->name('dashboard');
+
+Route::middleware('auth')->get('/user', function (Request $request) {
+    return response()->json($request->user());
+});
+
+Route::post('/register', [App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])
+    ->middleware('guest')
+    ->name('register');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
