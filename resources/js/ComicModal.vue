@@ -2,7 +2,7 @@
     <div class="modal-overlay" @click.self="close">
         <div class="modal">
             <h2>{{ comic.title }}</h2>
-            <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
+            <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title" class="comic-image">
             <p>{{ comic.description }}</p>
             <button @click="close">Sluiten</button>
         </div>
@@ -37,5 +37,9 @@ export default {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
+}
+
+.comic-image {
+    width: 50%;
 }
 </style>
