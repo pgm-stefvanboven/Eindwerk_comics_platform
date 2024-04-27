@@ -7,7 +7,7 @@
                 Welkom: {{ username }}
             </div>
             <div class="comic-list">
-                <div v-for="comic in comics" :key="comic.id" class="comic-card">
+                <div v-for="comic in comics" :key="comic.id" class="comic-card" @click="selectComic(comic)">
                     <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title"
                         class="comic-image">
                     <div class="comic-details">
@@ -16,18 +16,24 @@
                 </div>
             </div>
         </div>
+        <comic-modal v-if="selectedComic" :comic="selectedComic" @close="selectedComic = null"></comic-modal>
     </div>
 </template>
 
 <script>
 import axios from 'axios';
+import ComicModal from './ComicModal.vue';
 
 export default {
+    components: {
+        ComicModal
+    },
     data() {
         return {
             comics: [],
             isLoggedIn: false,
-            username: null
+            username: null,
+            selectedComic: null
         };
     },
     created() {
@@ -67,6 +73,9 @@ export default {
                 .catch(error => {
                     console.error('Error checking login status:', error);
                 });
+        },
+        selectComic(comic) {
+            this.selectedComic = comic;
         }
 
     }

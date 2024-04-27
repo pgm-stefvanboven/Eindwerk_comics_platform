@@ -27,6 +27,12 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/comics/{id}', function ($id) {
+    return view('comic', ['id' => $id]);
+})->middleware(['auth', 'verified'])
+    ->name('comic'); 
+
+
 Route::middleware('auth')->get('/user', function (Request $request) {
     return response()->json($request->user());
 });
