@@ -7,7 +7,7 @@
         <li><a href="#" class="hover:text-yellow-300">About</a></li>
         <li><a href="#" class="hover:text-yellow-300">Chat</a></li>
         <li><a href="#" class="hover:text-yellow-300">Contact</a></li>
-        <!-- Logout knop -->
+        <!-- Logout button -->
         <li v-if="isLoggedIn">
           <form method="POST" action="/logout" @submit.prevent="logout">
             <button type="submit" class="hover:text-yellow-300">Logout</button>
