@@ -54,22 +54,20 @@ export default {
         return;
       }
 
-      const headers = {
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Pas aan op basis van je authenticatiemethode
-      };
-
-      axios.post('/logout', {}, { headers })
+      axios.post('/logout')
         .then(response => {
           console.log('Logout response:', response);
-          // Redirect naar de loginpagina na uitloggen
+          // Verwijder de toegangstoken uit de lokale opslag
+          localStorage.removeItem('accessToken');
+          // Stel de isLoggedIn status in op false
+          this.isLoggedIn = false;
+          // Redirect naar de inlogpagina na uitloggen
           window.location.replace('/login');
         })
         .catch(error => {
           console.error('Error logging out:', error);
         });
     }
-
-
   }
 };
 </script>
