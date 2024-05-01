@@ -30,7 +30,12 @@ Route::get('/dashboard', function () {
 Route::get('/comics/{id}', function ($id) {
     return view('comic', ['id' => $id]);
 })->middleware(['auth', 'verified'])
-    ->name('comic'); 
+    ->name('comic');
+
+Route::get('/series', function () {
+    return view('series');
+})->middleware(['auth', 'verified'])
+    ->name('series');
 
 
 Route::middleware('auth')->get('/user', function (Request $request) {

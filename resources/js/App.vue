@@ -17,6 +17,23 @@
             </div>
         </div>
         <comic-modal v-if="selectedComic" :comic="selectedComic" @close="selectedComic = null"></comic-modal>
+
+        <div class="about">
+            <h2 class="about-title">About ComicVerse</h2>
+            <div class="about-content">
+                <div class="about-content-left">
+                    <img src="/images/Eindwerk_logo.svg" alt="ComicVerse Logo" class="about-logo">
+                </div>
+
+                <div class="about-content-right">
+                    <p class="about-description">
+                        ComicVerse is an online platform where you can explore and read the latest Marvel comics. We
+                        have a vast collection of the best Marvel comics available for online reading. Sign up to gain
+                        access to our collection and start reading today!
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -94,6 +111,50 @@ h1 {
     margin-bottom: 20px;
 }
 
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.about {
+    margin-top: 50px;
+    padding: 20px;
+}
+
+.about-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.about-content {
+    display: flex;
+    align-items: center;
+}
+
+.about-content-left {
+    flex: 0 0 30%;
+}
+
+.about-logo {
+    width: 100%;
+    max-width: 200px;
+    display: block;
+    margin: 0 auto;
+}
+
+.about-content-right {
+    max-width: 53%;
+    flex: 1;
+    padding: 20px;
+}
+
+.about-description {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #555;
+}
+
 .comic-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -123,10 +184,6 @@ h1 {
 
 .comic-title {
     margin-top: 0;
-}
-
-.comic-description {
-    margin-bottom: 0;
 }
 
 .username {
