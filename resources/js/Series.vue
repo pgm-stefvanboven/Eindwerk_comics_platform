@@ -48,6 +48,11 @@ export default {
 </script>
 
 <style scoped>
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
 .serie-cards {
     max-width: 1536px;
     margin: 0 auto;
