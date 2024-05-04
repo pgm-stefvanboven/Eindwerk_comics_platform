@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Header from "./vue-components/Header.vue";
-import SeriesPage from './Series.vue';
+import Footer from "./vue-components/Footer.vue";
+import SeriesPage from "./Series.vue";
 
 const routes = [
     {
@@ -10,9 +11,14 @@ const routes = [
     },
     {
         name: "SeriesPage",
-        path: '/series', 
-        component: SeriesPage 
-    }
+        path: "/series",
+        component: SeriesPage,
+    },
+    {
+        name: "Footer",
+        path: "/",
+        component: Footer,
+    },
 ];
 
 const router = createRouter({

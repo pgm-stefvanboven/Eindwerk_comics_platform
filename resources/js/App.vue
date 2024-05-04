@@ -34,16 +34,53 @@
                 </div>
             </div>
         </div>
+
+        <div class="contact">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2 class="contact-title">Contact</h2>
+                    <ul>
+                        <li>Email: example@email.com</li>
+                        <li>Telefoon: 123-456-789</li>
+                        <li>Adres: Straatnaam 123, Stad, Land</li>
+                    </ul>
+                </div>
+
+                <div class="contact-form">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-mail:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    <button type="submit">Send</button>
+                </div>
+            </div>
+
+            <div class="contact-image">
+                <img src="/images/contact.png" alt="Contact" class="contact-image">
+            </div>
+        </div>
+
+        <Footer />
     </div>
 </template>
 
 <script>
 import axios from 'axios';
 import ComicModal from './ComicModal.vue';
+import Footer from './vue-components/Footer.vue';
 
 export default {
     components: {
-        ComicModal
+        ComicModal,
+        Footer
     },
     data() {
         return {
@@ -189,5 +226,75 @@ h2 {
 .username {
     font-size: 1.2rem;
     margin-bottom: 20px;
+}
+
+.contact {
+    display: flex;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.contact-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-title {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.contact-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.contact-image {
+    margin-left: 10px;
+    flex: 0 0 30%;
+    margin-top: 8%;
 }
 </style>

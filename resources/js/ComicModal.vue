@@ -3,7 +3,6 @@
         <div class="modal">
             <h2>{{ comic.title }}</h2>
             <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title" class="comic-image">
-            <p>{{ comic.description }}</p>
             <button @click="close">Sluiten</button>
         </div>
     </div>
