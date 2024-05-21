@@ -2,96 +2,74 @@
     <div>
         <router-view></router-view>
         <div class="comic-cards">
-            <h1>Marvel Comics</h1>
-            <div v-if="isLoggedIn" class="username">
-                Welkom: {{ username }}
-            </div>
-            <div class="comic-list">
-                <div v-for="comic in comics" :key="comic.id" class="comic-card" @click="selectComic(comic)">
-                    <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title"
-                        class="comic-image">
-                    <div class="comic-details">
-                        <h3 class="comic-title">{{ comic.title }}</h3>
+            <!--<div v-if="isLoggedIn" class="username">
+                Welkom: {{ username }} bij jouw ultieme comic bestemming! Bekijk je wishlist.
+            </div>-->
+
+            <a href="#" class="all-characters">All characters ></a>
+            <section class="main-content">
+                <div class="greeting">
+                    <div class="greeting-content">
+                        <h2>Greetings Comicfan!</h2>
+                        <p>Are you ready to dive deeper into the Marvel Comic Universe? 📚⭐</p>
+                        <p>Create your ultimate wishlist and track your adventures through the multiverse. 🌌💥</p>
+                        <a href="#" class="wishlist-button">Wishlist</a>
                     </div>
                 </div>
-            </div>
-        </div>
-        <comic-modal v-if="selectedComic" :comic="selectedComic" @close="selectedComic = null"></comic-modal>
 
-        <div class="about">
-            <h2 class="about-title">About ComicVerse</h2>
-            <div class="about-content">
-                <div class="about-content-left">
-                    <img src="/images/Eindwerk_logo.svg" alt="ComicVerse Logo" class="about-logo">
-                </div>
-
-                <div class="about-content-right">
-                    <p class="about-description">
-                        ComicVerse is an online platform where you can explore and read the latest Marvel comics. We
-                        have a vast collection of the best Marvel comics available for online reading. Sign up to gain
-                        access to our collection and start reading today!
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="contact">
-            <div class="contact-content">
-                <div class="contact-info">
-                    <h2 class="contact-title">Contact</h2>
-                    <ul>
-                        <li>Email: example@email.com</li>
-                        <li>Telefoon: 123-456-789</li>
-                        <li>Adres: Straatnaam 123, Stad, Land</li>
-                    </ul>
-                </div>
-
-                <div class="contact-form">
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" required>
+                <div class="popular-characters">
+                    <div class="characters-grid">
+                        <h2>Popular Characters</h2>
+                        <div class="character" v-for="character in popularCharacters" :key="character.id">
+                            <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
+                                :alt="character.name">
+                            <p class="character-name">
+                                {{ character.name }}
+                            </p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="email">E-mail:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Message:</label>
-                        <textarea id="message" name="message" rows="4" required></textarea>
-                    </div>
-                    <button type="submit">Send</button>
                 </div>
-            </div>
+            </section>
 
-            <div class="contact-image">
-                <img src="/images/contact.png" alt="Contact" class="contact-image">
-            </div>
+            <section class="newest-releases">
+                <h2>Newest Releases</h2>
+                <a href="#" class="all-releases">All releases ></a>
+                <div class="releases-carousel">
+                    <div class="release" v-for="release in newestReleases" :key="release.id">
+                        <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
+                        <p class="release-name">
+                            {{ release.title }}
+                        </p>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <Footer />
+        <!--<Footer />-->
     </div>
 </template>
 
 <script>
 import axios from 'axios';
-import ComicModal from './ComicModal.vue';
-import Footer from './vue-components/Footer.vue';
+// import Footer from './vue-components/Footer.vue';
 
 export default {
-    components: {
-        ComicModal,
+    /* components: {
         Footer
-    },
+    }, */
     data() {
         return {
             comics: [],
+            popularCharacters: [],
+            newestReleases: [],
             isLoggedIn: false,
-            username: null,
-            selectedComic: null
+            username: null
         };
     },
     created() {
         this.fetchComics();
+        this.fetchPopularCharacters();
+        this.fetchNewestReleases();
         this.checkLoginStatus();
     },
     methods: {
@@ -104,24 +82,44 @@ export default {
                     console.error('Error fetching Marvel comics:', error);
                 });
         },
+        fetchPopularCharacters() {
+            axios.get('https://gateway.marvel.com/v1/public/characters?orderBy=-modified&limit=4&ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
+                .then(response => {
+                    this.popularCharacters = response.data.data.results;
+                })
+                .catch(error => {
+                    console.error('Error fetching popular characters:', error);
+                });
+        },
+        fetchNewestReleases() {
+            axios.get('https://gateway.marvel.com/v1/public/comics?orderBy=-onsaleDate&limit=5&ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
+                .then(response => {
+                    this.newestReleases = response.data.data.results;
+                    this.newestReleases.forEach(release => {
+                        if (release.thumbnail.path.endsWith('image_not_available')) {
+                            // Vervang de thumbnail door een standaard afbeelding
+                            release.thumbnail.path = '/images/clean';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching newest releases:', error);
+                });
+        },
         checkLoginStatus() {
             const accessToken = localStorage.getItem('accessToken');
             if (accessToken) {
-                // Als er een toegangstoken wordt gevonden, ga ervan uit dat de gebruiker is ingelogd
                 this.isLoggedIn = true;
-                // Je kunt ervoor kiezen om andere gebruikersgegevens op te halen en in te stellen, zoals de gebruikersnaam
-                // In dit voorbeeld stel ik alleen de inlogstatus in
                 return;
             }
 
-            // Als er geen toegangstoken wordt gevonden, controleer dan via het gebruikersendpoint
             axios.get('/user')
                 .then(response => {
                     if (response.data) {
-                        this.isLoggedIn = true; // Gebruiker is ingelogd
-                        this.username = response.data.username; // Gebruikersnaam ophalen uit de respons
+                        this.isLoggedIn = true;
+                        this.username = response.data.username;
                     } else {
-                        this.isLoggedIn = false; // Gebruiker is niet ingelogd
+                        this.isLoggedIn = false;
                     }
                 })
                 .catch(error => {
@@ -129,14 +127,169 @@ export default {
                 });
         },
         selectComic(comic) {
-            this.selectedComic = comic;
-        }
+            // Handle comic selection (e.g., navigate to comic details page)
 
+            // Voorbeeld: navigeer naar de comic details pagina
+            this.$router.push({ name: 'comic-details', params: { id: comic.id } });
+
+            // Voorbeeld: voeg comic toe aan wishlist
+            // axios.post('/wishlist', { comicId: comic.id })
+            //     .then(response => {
+            //         console.log('Comic added to wishlist:', response.data);
+            //     })
+            //     .catch(error => {
+            //         console.error('Error adding comic to wishlist:', error);
+            //     });
+
+            // Voorbeeld: verwijder comic uit wishlist
+            // axios.delete(`/wishlist/${comic.id}`)
+            //     .then(response => {
+            //         console.log('Comic removed from wishlist:', response.data);
+            //     })
+            //     .catch(error => {
+            //         console.error('Error removing comic from wishlist:', error);
+            //     });
+        }
     }
 };
 </script>
 
 <style scoped>
+.main-content {
+    display: flex;
+    justify-content: center;
+}
+
+.greeting {
+    background-color: #FDC247;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    width: 36%;
+    height: 277px;
+}
+
+.greeting-content {
+    margin-top: 5%;
+}
+
+.greeting p {
+    max-width: 65%;
+    margin-left: 20%;
+    margin-top: 3%;
+}
+
+.wishlist-button {
+    background-color: #CA8A04;
+    color: #fff;
+    border: none;
+    padding: 10px 30px;
+    cursor: pointer;
+    border-radius: 20px;
+    margin-top: 2px;
+}
+
+.popular-characters {
+    width: 26%;
+    height: 30rem;
+    margin-left: 34%;
+    background-color: #FDC247;
+    border-radius: 20px;
+}
+
+.characters-grid {
+    display: grid;
+    text-align: center;
+    padding: 20px;
+}
+
+.character {
+    padding: 10px;
+}
+
+.character img {
+    width: 155px;
+    height: 66%;
+    margin-bottom: 10px;
+}
+
+.character-name {
+    font-size: 16px;
+    font-weight: bold
+}
+
+.characters-grid h2 {
+    grid-column: span 2;
+    margin: 0px;
+    margin-top: -2%;
+    margin-bottom: 2%;
+    font-size: 20px;
+}
+
+.all-characters {
+    width: 9%;
+    display: block;
+    text-align: right;
+    margin-top: 10px;
+    background-color: #d4a017;
+    color: #fff;
+    padding: 10px 8px;
+    border-radius: 25px;
+    text-decoration: none;
+    margin-left: 89%;
+    margin-bottom: 0.5%;
+}
+
+.all-releases {
+    width: 8%;
+    display: block;
+    text-align: center;
+    background-color: #d4a017;
+    color: #fff;
+    padding: 10px 4px;
+    border-radius: 25px;
+    text-decoration: none;
+    margin-left: 90%;
+    margin-top: -2%;
+}
+
+.newest-releases {
+    margin-top: 70px;
+}
+
+.newest-releases h2 {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 1px;
+}
+
+.releases-carousel {
+    display: flex;
+    justify-content: unset;
+    margin-top: 10px;
+}
+
+.release {
+    flex: 0 0 auto;
+    margin-left: 29.5px;
+    margin-right: 75.3px;
+    width: 200px;
+    height: 300px;
+}
+
+.release img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.release-name {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .comic-cards {
     max-width: 1536px;
     margin: 0 auto;

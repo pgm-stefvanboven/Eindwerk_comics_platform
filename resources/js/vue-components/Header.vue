@@ -23,24 +23,24 @@ export default {
   name: 'Header',
   data() {
     return {
-      isLoggedIn: false, // We zullen deze waarde dynamisch instellen op basis van de gebruikersstatus
-      username: null // Gebruikersnaam van ingelogde gebruiker
+      isLoggedIn: false,
+      username: null // Username of logged in user
     };
   },
   created() {
-    // Controleren of de gebruiker is ingelogd wanneer de component wordt gemaakt
+    // Verify that the user is logged in when the component is created
     this.checkLoginStatus();
   },
   methods: {
     checkLoginStatus() {
-      // Controleer of de gebruiker is ingelogd via Laravel
+      // Check if the user is logged in via Laravel
       axios.get('/user')
         .then(response => {
           if (response.data) {
-            this.isLoggedIn = true; // Gebruiker is ingelogd
-            this.username = response.data.username; // Gebruikersnaam ophalen uit de respons
+            this.isLoggedIn = true; // User is logged in
+            this.username = response.data.username; // Retrieve username from response
           } else {
-            this.isLoggedIn = false; // Gebruiker is niet ingelogd
+            this.isLoggedIn = false; // User is not logged in
           }
         })
         .catch(error => {
@@ -56,11 +56,11 @@ export default {
       axios.post('/logout')
         .then(response => {
           console.log('Logout response:', response);
-          // Verwijder de toegangstoken uit de lokale opslag
+          // Remove the access token from local storage
           localStorage.removeItem('accessToken');
-          // Stel de isLoggedIn status in op false
+          // Set the isLoggedIn status to false
           this.isLoggedIn = false;
-          // Redirect naar de inlogpagina na uitloggen
+          // Redirect to the login page after logging out
           window.location.replace('/login');
         })
         .catch(error => {
