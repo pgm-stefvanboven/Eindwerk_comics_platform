@@ -13,8 +13,8 @@
                         <h2>Greetings Comicfan!</h2>
                         <p>Are you ready to dive deeper into the Marvel Comic Universe? 📚⭐</p>
                         <p>Create your ultimate wishlist and track your adventures through the multiverse. 🌌💥</p>
-                        <a href="#" class="wishlist-button">Wishlist</a>
                     </div>
+                    <a href="#" class="wishlist-button">Wishlist</a>
                 </div>
 
                 <div class="popular-characters">
@@ -45,18 +45,18 @@
             </section>
         </div>
 
-        <!--<Footer />-->
+        <Footer />
     </div>
 </template>
 
 <script>
 import axios from 'axios';
-// import Footer from './vue-components/Footer.vue';
+import Footer from './vue-components/Footer.vue';
 
 export default {
-    /* components: {
+    components: {
         Footer
-    }, */
+    },
     data() {
         return {
             comics: [],
@@ -171,6 +171,7 @@ export default {
 
 .greeting-content {
     margin-top: 5%;
+    margin-bottom: 5%;
 }
 
 .greeting p {
@@ -185,8 +186,7 @@ export default {
     border: none;
     padding: 10px 30px;
     cursor: pointer;
-    border-radius: 20px;
-    margin-top: 2px;
+    border-radius: 25px;
 }
 
 .popular-characters {
