@@ -27,6 +27,11 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/comics', function () {
+    return view('comics');
+})->middleware(['auth', 'verified'])
+    ->name('comics');
+
 Route::get('/comics/{id}', function ($id) {
     return view('comic', ['id' => $id]);
 })->middleware(['auth', 'verified'])
