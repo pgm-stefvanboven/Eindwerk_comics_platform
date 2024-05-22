@@ -22,6 +22,7 @@
         "@vitejs/plugin-vue": "^5.0.4",
         "hot": "^0.0.7",
         "vue": "^3.4.21",
-        "vue-router": "^4.0.13"
+        "vue-router": "^4.0.13",
+        "vue-select": "^4.0.0-beta.6"
     }
 }

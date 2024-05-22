@@ -1,7 +1,7 @@
 <template>
   <header class="bg-yellow-600 py-4">
     <nav class="max-w-screen-2xl mx-auto flex items-center justify-between px-4">
-      <h1 class="text-3xl font-bold text-white"><a href="#" class="hover:text-yellow-300">Marvel Comic Universe</a></h1>
+      <h1 class="text-3xl font-bold text-white"><a href="/" class="hover:text-yellow-300">Marvel Comic Universe</a></h1>
       <input type="text" placeholder="Search" class="p-2 rounded-lg" />
       <ul class="flex space-x-4 text-white">
         <li><router-link to="/comics" class="text hover:text-yellow-300">Comics</router-link></li>
