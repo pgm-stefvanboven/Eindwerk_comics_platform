@@ -10,26 +10,23 @@
                 <div class="filters">
                     <div class="filter">
                         <label for="characters">Characters</label>
-                        <v-select id="characters" v-model="filters.characters"
-                            :options="characters.map(character => character.name)" :reduce="character => character"
-                            :multiple="true" />
+                        <v-select id="characters" v-model="filters.characters" :options="characters" label="name"
+                            :reduce="character => character.id" :multiple="true" />
                     </div>
-
                     <div class="filter">
                         <label for="series">Series</label>
-                        <v-select id="series" v-model="filters.series" :options="series.map(serie => serie.title)"
-                            :reduce="serie => serie" :multiple="true" />
+                        <v-select id="series" v-model="filters.series" :options="seriesList" label="title"
+                            :reduce="series => series.id" :multiple="true" />
                     </div>
-
                     <div class="filter">
                         <label for="writers">Writers</label>
-                        <v-select id="writers" v-model="filters.writers"
-                            :options="creators.map(creator => creator.fullName)" :reduce="creator => creator"
-                            :multiple="true" />
+                        <v-select id="writers" v-model="filters.writers" :options="writers" label="fullName"
+                            :reduce="writer => writer.id" :multiple="true" />
                     </div>
                 </div>
 
                 <div class="comic-list">
+                    <div v-if="filteredComics.length === 0">Geen comics gevonden</div>
                     <div v-for="comic in paginatedComics" :key="comic.id" class="comic-card">
                         <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
                         <p class="comic-title">{{ comic.title }}</p>
@@ -65,8 +62,8 @@ export default {
             comics: [],
             filteredComics: [],
             characters: [],
-            series: [],
-            creators: [],
+            seriesList: [],
+            writers: [],
             currentPage: 1,
             comicsPerPage: 10,
             filters: {
@@ -87,8 +84,7 @@ export default {
             axios.get('https://gateway.marvel.com/v1/public/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
                 .then(response => {
                     this.comics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
-                    this.filteredComics = this.comics;  // Initialize filteredComics with all comics
-                    console.log('Fetched comics:', this.comics);  // Debug statement to check the structure of the comics
+                    this.filteredComics = this.comics;
                 })
                 .catch(error => {
                     console.error('Error fetching comics:', error);
@@ -97,7 +93,7 @@ export default {
         fetchCharacters() {
             axios.get('https://gateway.marvel.com/v1/public/characters?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
                 .then(response => {
-                    this.characters = response.data.data.results;
+                    this.characters = response.data.data.results.filter(character => character.comics.available > 0);
                 })
                 .catch(error => {
                     console.error('Error fetching characters:', error);
@@ -106,7 +102,7 @@ export default {
         fetchSeries() {
             axios.get('https://gateway.marvel.com/v1/public/series?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
                 .then(response => {
-                    this.series = response.data.data.results;
+                    this.seriesList = response.data.data.results;
                 })
                 .catch(error => {
                     console.error('Error fetching series:', error);
@@ -115,10 +111,68 @@ export default {
         fetchWriters() {
             axios.get('https://gateway.marvel.com/v1/public/creators?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
                 .then(response => {
-                    this.creators = response.data.data.results;
+                    this.writers = response.data.data.results.filter(writer => writer.comics.available > 0);
                 })
                 .catch(error => {
                     console.error('Error fetching writers:', error);
+                });
+        },
+        filterComics() {
+            this.filteredComics = this.comics.filter(comic => {
+                const matchesCharacters = this.filters.characters.length === 0 || comic.characters.items.some(character =>
+                    this.filters.characters.includes(character.resourceURI.split('/').pop())
+                );
+                const matchesSeries = this.filters.series.length === 0 || this.filters.series.includes(comic.series.resourceURI.split('/').pop());
+                const matchesWriters = this.filters.writers.length === 0 || comic.creators.items.some(creator =>
+                    this.filters.writers.includes(creator.resourceURI.split('/').pop())
+                );
+                return matchesCharacters && matchesSeries && matchesWriters;
+            });
+
+            if (this.filteredComics.length === 0) {
+                // Fetch comics for each character, series, and writer individually if no comics are found in the initial filter
+                if (this.filters.characters.length > 0) {
+                    this.filters.characters.forEach(characterId => {
+                        this.fetchComicsByCharacter(characterId);
+                    });
+                }
+                if (this.filters.series.length > 0) {
+                    this.filters.series.forEach(seriesId => {
+                        this.fetchComicsBySeries(seriesId);
+                    });
+                }
+                if (this.filters.writers.length > 0) {
+                    this.filters.writers.forEach(creatorId => {
+                        this.fetchComicsByWriter(creatorId);
+                    });
+                }
+            }
+        },
+        fetchComicsByCharacter(characterId) {
+            axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
+                .then(response => {
+                    this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
+                })
+                .catch(error => {
+                    console.error('Error fetching comics by character:', error);
+                });
+        },
+        fetchComicsBySeries(seriesId) {
+            axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
+                .then(response => {
+                    this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
+                })
+                .catch(error => {
+                    console.error('Error fetching comics by series:', error);
+                });
+        },
+        fetchComicsByWriter(creatorId) {
+            axios.get(`https://gateway.marvel.com/v1/public/creators/${creatorId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
+                .then(response => {
+                    this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
+                })
+                .catch(error => {
+                    console.error('Error fetching comics by writer:', error);
                 });
         },
         nextPage() {
@@ -130,43 +184,6 @@ export default {
             if (this.currentPage > 1) {
                 this.currentPage--;
             }
-        },
-        applyFilters() {
-            console.log('Applying filters:', this.filters);
-
-            let filteredComics = this.comics;
-
-            if (this.filters.characters.length > 0) {
-                filteredComics = filteredComics.filter(comic => {
-                    const characterIds = this.filters.characters.map(character => character.id);
-                    const comicCharacterIds = comic.characters.items.map(item => item.id);
-                    const match = characterIds.some(id => comicCharacterIds.includes(id));
-                    console.log('Character filter', this.filters.characters, 'Match:', match, 'Comic:', comic);
-                    return match;
-                });
-            }
-
-
-            if (this.filters.series.length > 0) {
-                filteredComics = filteredComics.filter(comic => {
-                    const match = this.filters.series.includes(comic.series.name);
-                    console.log('Series filter', comic.series.name, 'Match:', match, 'Comic:', comic);
-                    return match;
-                });
-            }
-
-            if (this.filters.writers.length > 0) {
-                filteredComics = filteredComics.filter(comic => {
-                    const match = this.filters.writers.some(writer =>
-                        comic.creators.items.some(item => item.name === writer)
-                    );
-                    console.log('Writer filter', writer, 'Match:', match, 'Comic:', comic);
-                    return match;
-                });
-            }
-
-            console.log('Filtered comics:', filteredComics);
-            this.filteredComics = filteredComics;
         }
     },
     computed: {
@@ -180,10 +197,24 @@ export default {
         }
     },
     watch: {
-        filters: {
+        'filters.characters': {
             handler() {
+                this.filterComics();
                 this.currentPage = 1;
-                this.applyFilters();
+            },
+            deep: true
+        },
+        'filters.series': {
+            handler() {
+                this.filterComics();
+                this.currentPage = 1;
+            },
+            deep: true
+        },
+        'filters.writers': {
+            handler() {
+                this.filterComics();
+                this.currentPage = 1;
             },
             deep: true
         }
@@ -210,7 +241,7 @@ export default {
 }
 
 .comics-title {
-    margin-right: 790px;
+    margin-right: 840px;
 }
 
 .content {
@@ -268,7 +299,7 @@ export default {
     justify-content: center;
     align-items: center;
     margin-top: 20px;
-    margin-right: 362px;
+    margin-right: 460px;
 }
 
 button {
