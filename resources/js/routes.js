@@ -1,14 +1,14 @@
 import { createWebHistory, createRouter } from "vue-router";
-import Header from "./vue-components/Header.vue";
-import Footer from "./vue-components/Footer.vue";
+import Home from "./Home.vue";
 import ComicsPage from "./Comics.vue";
+import ComicDetail from "./ComicDetail.vue";
 import SeriesPage from "./Series.vue";
 
 const routes = [
     {
-        name: "Header",
+        name: "Home",
         path: "/",
-        component: Header,
+        component: Home,
     },
     {
         name: "ComicsPage",
@@ -16,14 +16,15 @@ const routes = [
         component: ComicsPage,
     },
     {
+        path: "/comic/:id",
+        name: "comic",
+        component: ComicDetail,
+        props: true,
+    },
+    {
         name: "SeriesPage",
         path: "/series",
         component: SeriesPage,
-    },
-    {
-        name: "Footer",
-        path: "/",
-        component: Footer,
     },
 ];
 

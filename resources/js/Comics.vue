@@ -29,7 +29,8 @@
                     <div v-if="filteredComics.length === 0">Geen comics gevonden</div>
                     <div v-for="comic in paginatedComics" :key="comic.id" class="comic-card">
                         <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
-                        <p class="comic-title">{{ comic.title }}</p>
+                        <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-title">{{ comic.title
+                            }}</router-link>
                     </div>
                 </div>
             </div>

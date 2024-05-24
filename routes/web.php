@@ -17,30 +17,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/', function () {
+Route::get('/{any}', function () {
     return view('index');
-})->middleware(['auth', 'verified'])
-    ->name('index');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-Route::get('/comics', function () {
-    return view('comics');
-})->middleware(['auth', 'verified'])
-    ->name('comics');
-
-Route::get('/comics/{id}', function ($id) {
-    return view('comic', ['id' => $id]);
-})->middleware(['auth', 'verified'])
-    ->name('comic');
-
-Route::get('/series', function () {
-    return view('series');
-})->middleware(['auth', 'verified'])
-    ->name('series');
+})->where('any', '.*')->middleware(['auth', 'verified']);
 
 
 Route::middleware('auth')->get('/user', function (Request $request) {
