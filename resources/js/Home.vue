@@ -33,13 +33,12 @@
 
             <section class="newest-releases">
                 <h2>Newest Releases</h2>
-                <a href="#" class="all-releases">All releases ></a>
+                <a href="/comics" class="all-releases">All releases ></a>
                 <div class="releases-carousel">
                     <div class="release" v-for="release in newestReleases" :key="release.id">
                         <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
-                        <p class="release-name">
-                            {{ release.title }}
-                        </p>
+                        <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">{{
+                            release.title }}</router-link>
                     </div>
                 </div>
             </section>

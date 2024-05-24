@@ -26,11 +26,17 @@
                 </div>
 
                 <div class="comic-list">
-                    <div v-if="filteredComics.length === 0">Geen comics gevonden</div>
+                    <div v-if="isLoading">
+                        <p>Loading...</p>
+                    </div>
+                    <div v-else-if="isLoadingFilteredComics">
+                        <p>Loading...</p>
+                    </div>
+                    <div v-else-if="filteredComics.length === 0">No comics found</div>
                     <div v-for="comic in paginatedComics" :key="comic.id" class="comic-card">
                         <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
-                        <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-title">{{ comic.title
-                            }}</router-link>
+                        <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-title">{{
+                            comic.title }}</router-link>
                     </div>
                 </div>
             </div>
@@ -61,6 +67,8 @@ export default {
     data() {
         return {
             comics: [],
+            isLoading: true,
+            isLoadingFilteredComics: false,
             filteredComics: [],
             characters: [],
             seriesList: [],
@@ -86,6 +94,7 @@ export default {
                 .then(response => {
                     this.comics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
                     this.filteredComics = this.comics;
+                    this.isLoading = false;
                 })
                 .catch(error => {
                     console.error('Error fetching comics:', error);
@@ -119,6 +128,7 @@ export default {
                 });
         },
         filterComics() {
+            this.isLoadingFilteredComics = true; // Zet de nieuwe variabele op true aan het begin van de filterfunctie
             this.filteredComics = this.comics.filter(comic => {
                 const matchesCharacters = this.filters.characters.length === 0 || comic.characters.items.some(character =>
                     this.filters.characters.includes(character.resourceURI.split('/').pop())
@@ -147,12 +157,15 @@ export default {
                         this.fetchComicsByWriter(creatorId);
                     });
                 }
+            } else {
+                this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false als er strips zijn gevonden
             }
         },
         fetchComicsByCharacter(characterId) {
             axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
                 .then(response => {
                     this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
+                    this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false na het laden van de strips
                 })
                 .catch(error => {
                     console.error('Error fetching comics by character:', error);
@@ -162,6 +175,7 @@ export default {
             axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
                 .then(response => {
                     this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
+                    this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false na het laden van de strips
                 })
                 .catch(error => {
                     console.error('Error fetching comics by series:', error);
@@ -171,6 +185,7 @@ export default {
             axios.get(`https://gateway.marvel.com/v1/public/creators/${creatorId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
                 .then(response => {
                     this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
+                    this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false na het laden van de strips
                 })
                 .catch(error => {
                     console.error('Error fetching comics by writer:', error);
