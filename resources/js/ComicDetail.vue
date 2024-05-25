@@ -2,8 +2,17 @@
     <div>
         <Header />
         <div v-if="comic">
-            <h2>{{ comic.title }}</h2>
             <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title" class="comic-image">
+            <div class="comic-info">
+                <h2>{{ comic.title }}</h2>
+                <p v-if="comic.pageCount">Aantal pagina's: {{ comic.pageCount }}</p>
+                <p v-if="comic.dates && comic.dates.length > 0">Uitgegeven op: {{ comic.dates[0].date }}</p>
+                <p v-if="comic.creators && comic.creators.items.length > 0">Gemaakt door:
+                    <span v-for="(creator, index) in comic.creators.items">
+                        {{ creator.name }}{{ index < comic.creators.items.length - 1 ? ', ' : '' }}
+                    </span>
+                </p>
+            </div>
         </div>
         <div v-else-if="error">
             <p>{{ error }}</p>

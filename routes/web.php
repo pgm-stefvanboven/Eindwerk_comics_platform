@@ -19,7 +19,12 @@ use Illuminate\Http\Request;
 
 Route::get('/{any}', function () {
     return view('index');
-})->where('any', '.*')->middleware(['auth', 'verified']);
+})->where('any', '.*');
+
+/* Route::get('/comics', function () {
+    return view('comics');
+})->middleware(['auth', 'verified'])
+    ->name('comics'); */
 
 
 Route::middleware('auth')->get('/user', function (Request $request) {
