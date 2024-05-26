@@ -42,7 +42,7 @@ export default {
         };
     },
     created() {
-        console.log('Comic ID:', this.id);  // Controleer of de id correct wordt doorgegeven
+        console.log('Comic ID:', this.id);  // Check whether the ID is passed correctly
         this.fetchComicDetails();
     },
     methods: {

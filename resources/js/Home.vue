@@ -15,7 +15,7 @@
 
                 <div class="popular-characters">
                     <div class="characters-grid">
-                        <h2>Popular Characters</h2>
+                        <h2>Featured Characters</h2>
                         <div class="character" v-for="character in popularCharacters" :key="character.id">
                             <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
                                 :alt="character.name">
