@@ -2,7 +2,6 @@ import { createWebHistory, createRouter } from "vue-router";
 import Home from "./Home.vue";
 import ComicsPage from "./Comics.vue";
 import ComicDetail from "./ComicDetail.vue";
-import SeriesPage from "./Series.vue";
 
 const routes = [
     {
@@ -20,11 +19,6 @@ const routes = [
         name: "comic",
         component: ComicDetail,
         props: true,
-    },
-    {
-        name: "SeriesPage",
-        path: "/series",
-        component: SeriesPage,
     },
 ];
 

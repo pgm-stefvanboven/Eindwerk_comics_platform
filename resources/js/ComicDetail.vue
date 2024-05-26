@@ -48,7 +48,7 @@ export default {
     methods: {
         async fetchComicDetails() {
             try {
-                const response = await axios.get(`https://gateway.marvel.com/v1/public/comics/${this.id}?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`);
+                const response = await axios.get(`https://gateway.marvel.com/v1/public/comics/${this.id}?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`);
                 if (response.data && response.data.data && response.data.data.results.length > 0) {
                     this.comic = response.data.data.results[0];
                 } else {

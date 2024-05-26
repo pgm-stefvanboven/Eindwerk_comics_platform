@@ -21,12 +21,6 @@ Route::get('/{any}', function () {
     return view('index');
 })->where('any', '.*');
 
-/* Route::get('/comics', function () {
-    return view('comics');
-})->middleware(['auth', 'verified'])
-    ->name('comics'); */
-
-
 Route::middleware('auth')->get('/user', function (Request $request) {
     return response()->json($request->user());
 });

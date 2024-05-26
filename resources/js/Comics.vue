@@ -90,7 +90,7 @@ export default {
     },
     methods: {
         fetchComics() {
-            axios.get('https://gateway.marvel.com/v1/public/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
+            axios.get('https://gateway.marvel.com/v1/public/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471')
                 .then(response => {
                     this.comics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
                     this.filteredComics = this.comics;
@@ -101,7 +101,7 @@ export default {
                 });
         },
         fetchCharacters() {
-            axios.get('https://gateway.marvel.com/v1/public/characters?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
+            axios.get('https://gateway.marvel.com/v1/public/characters?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471')
                 .then(response => {
                     this.characters = response.data.data.results.filter(character => character.comics.available > 0);
                 })
@@ -110,7 +110,7 @@ export default {
                 });
         },
         fetchSeries() {
-            axios.get('https://gateway.marvel.com/v1/public/series?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
+            axios.get('https://gateway.marvel.com/v1/public/series?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471')
                 .then(response => {
                     this.seriesList = response.data.data.results;
                 })
@@ -119,7 +119,7 @@ export default {
                 });
         },
         fetchWriters() {
-            axios.get('https://gateway.marvel.com/v1/public/creators?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1')
+            axios.get('https://gateway.marvel.com/v1/public/creators?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471')
                 .then(response => {
                     this.writers = response.data.data.results.filter(writer => writer.comics.available > 0);
                 })
@@ -162,7 +162,7 @@ export default {
             }
         },
         fetchComicsByCharacter(characterId) {
-            axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
+            axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
                 .then(response => {
                     this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
                     this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false na het laden van de strips
@@ -172,7 +172,7 @@ export default {
                 });
         },
         fetchComicsBySeries(seriesId) {
-            axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
+            axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
                 .then(response => {
                     this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
                     this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false na het laden van de strips
@@ -182,7 +182,7 @@ export default {
                 });
         },
         fetchComicsByWriter(creatorId) {
-            axios.get(`https://gateway.marvel.com/v1/public/creators/${creatorId}/comics?ts=1&apikey=9446f8eb6e1702835dbb961d763f4401&hash=b1f7a0387b6770554c0768bb48ac02c1`)
+            axios.get(`https://gateway.marvel.com/v1/public/creators/${creatorId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
                 .then(response => {
                     this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
                     this.isLoadingFilteredComics = false; // Zet de nieuwe variabele op false na het laden van de strips

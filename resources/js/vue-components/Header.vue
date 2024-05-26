@@ -5,7 +5,7 @@
       <input type="text" placeholder="Search" class="p-2 rounded-lg" />
       <ul class="flex space-x-4 text-white">
         <li><router-link to="/comics" class="text hover:text-yellow-300">Comics</router-link></li>
-        <li><router-link to="/characters" class="text hover:text-yellow-300">Characters</router-link></li>
+        <li><router-link to="" class="text hover:text-yellow-300">Characters</router-link></li>
         <li><a href="#" class="text hover:text-yellow-300">About</a></li>
         <!-- Logout button -->
         <li v-if="isLoggedIn">
