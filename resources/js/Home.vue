@@ -2,7 +2,7 @@
     <div>
         <Header />
         <div class="comic-cards">
-            <a href="" class="all-characters">All characters ></a>
+            <a href="/characters" class="all-characters">All characters ></a>
             <section class="main-content">
                 <div class="greeting">
                     <div class="greeting-content">
@@ -19,9 +19,9 @@
                         <div class="character" v-for="character in popularCharacters" :key="character.id">
                             <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
                                 :alt="character.name">
-                            <p class="character-name">
-                                {{ character.name }}
-                            </p>
+                            <router-link :to="{ name: 'character', params: { id: character.id } }"
+                                class="character-name">{{
+                                character.name }}</router-link>
                         </div>
                     </div>
                 </div>
