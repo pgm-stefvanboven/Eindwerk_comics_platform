@@ -20,8 +20,7 @@
                             <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
                                 :alt="character.name">
                             <router-link :to="{ name: 'character', params: { id: character.id } }"
-                                class="character-name">{{
-                                character.name }}</router-link>
+                                class="character-name">{{ character.name }}</router-link>
                         </div>
                     </div>
                 </div>
@@ -32,7 +31,13 @@
                 <a href="/comics" class="all-releases">All releases ></a>
                 <div class="releases-carousel">
                     <div class="release" v-for="release in newestReleases" :key="release.id">
-                        <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
+                        <div class="img-container">
+                            <div class="circular-heart" @click="toggleWishlist(release)"
+                                :class="{ 'wishlist-added': isInWishlist(release) }">
+                                <i class="ri-heart-line icon"></i>
+                            </div>
+                            <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
+                        </div>
                         <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">{{
                             release.title }}</router-link>
                     </div>
@@ -63,16 +68,13 @@
             return {
                 comics: [],
                 popularCharacters: [],
-                newestReleases: [],
-                isLoggedIn: false,
-                username: null
+                newestReleases: []
             };
         },
         created() {
             this.loadCachedData();
             this.fetchDataWithBackoff('popularCharacters', this.fetchPopularCharacters);
             this.fetchDataWithBackoff('newestReleases', this.fetchNewestReleases);
-            this.checkLoginStatus();
         },
         methods: {
             loadCachedData() {
@@ -102,7 +104,7 @@
                     } catch (error) {
                         if (error.response && error.response.status === 429) {
                             retries++;
-                            const waitTime = retries * 2000; // Verhoog de wachttijd
+                            const waitTime = retries * 2000;
                             console.error(`Attempt ${retries} failed. Retrying in ${waitTime}ms...`);
                             await delay(waitTime);
                         } else {
@@ -125,29 +127,24 @@
                     }
                 });
             },
-            checkLoginStatus() {
-                const accessToken = localStorage.getItem('accessToken');
-                if (accessToken) {
-                    this.isLoggedIn = true;
-                    return;
-                }
-
-                axios.get('/user')
-                    .then(response => {
-                        if (response.data) {
-                            this.isLoggedIn = true;
-                            this.username = response.data.username;
-                        } else {
-                            this.isLoggedIn = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error checking login status:', error);
-                    });
+            isInWishlist(release) {
+                let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+                return wishlist.some(item => item.id === release.id);
             },
-            selectComic(comic) {
-                this.$router.push({ name: 'comic-details', params: { id: comic.id } });
-            }
+
+            toggleWishlist(release) {
+                let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+                const index = wishlist.findIndex(item => item.id === release.id);
+                if (index === -1) {
+                    wishlist.push(release);
+                    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                    alert(`${release.title} added to wishlist!`);
+                } else {
+                    wishlist.splice(index, 1);
+                    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                    alert(`${release.title} removed from wishlist!`);
+                }
+            },
         }
     };
 </script>
@@ -447,5 +444,32 @@
         margin-left: 10px;
         flex: 0 0 30%;
         margin-top: 8%;
+    }
+
+    .circular-heart {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .circular-heart i {
+        font-size: 1.5rem;
+        color: #fff;
+    }
+
+    .wishlist-added {
+        color: #d63031;
+        background-color: #d63031;
+    }
+
+    .release {
+        position: relative;
     }
 </style>

@@ -7,12 +7,6 @@
         <li><router-link to="/comics" class="text hover:text-yellow-300">Comics</router-link></li>
         <li><router-link to="/characters" class="text hover:text-yellow-300">Characters</router-link></li>
         <li><a href="#" class="text hover:text-yellow-300">About</a></li>
-        <!-- Logout button -->
-        <li v-if="isLoggedIn">
-          <form method="POST" action="/logout" @submit.prevent="logout">
-            <button type="submit" class="text hover:text-yellow-300">Logout</button>
-          </form>
-        </li>
       </ul>
     </nav>
   </header>

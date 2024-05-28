@@ -4,6 +4,7 @@ import ComicsPage from "./Comics.vue";
 import ComicDetail from "./ComicDetail.vue";
 import CharactersPage from "./Characters.vue";
 import CharacterDetail from "./CharacterDetail.vue";
+import WishlistPage from "./Wishlist.vue";
 
 const routes = [
     {
@@ -32,6 +33,11 @@ const routes = [
         name: "character",
         component: CharacterDetail,
         props: true,
+    },
+    {
+        name: "WishlistPage",
+        path: "/wishlist",
+        component: WishlistPage,
     },
 ];
 
