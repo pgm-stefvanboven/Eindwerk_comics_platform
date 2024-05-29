@@ -4,17 +4,19 @@ services:
     env: php
     plan: standard
     buildCommand: |
-      composer install --optimize-autoloader --no-dev
+      apt-get update && apt-get install -y unzip
+      curl -sS https://getcomposer.org/installer | php
+      php composer.phar install --optimize-autoloader --no-dev
       npm install
       npm run build
-    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    startCommand: /etc/init.d/nginx start && php-fpm
     envVars:
       - key: APP_ENV
-        value: local
+        value: production
       - key: APP_KEY
         value: base64:hjJ7Kk7F5iN4lpJUViiFp+coY3h625wlMTHb9npcHeM=
       - key: APP_DEBUG
-        value: true
+        value: false
       - key: APP_URL
         value: https://comics-platform.ddev.site
       - key: LOG_CHANNEL
