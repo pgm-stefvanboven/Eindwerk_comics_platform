@@ -5,8 +5,8 @@
         <div v-if="comic" class="comic-details">
             <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title" class="comic-image">
             <div class="comic-info">
-                <h2>{{ comic.title }}</h2>
-                <h3>More Details</h3>
+                <h2 class="title">{{ comic.title }}</h2>
+                <h3 class="small-title">More Details:</h3>
                 <p v-if="comic.format">Formaat: {{ comic.format }}</p>
                 <p v-if="comic.pageCount">Aantal pagina's: {{ comic.pageCount }}</p>
                 <p v-if="comic.modified">Published: {{ formatDate(comic.modified) }}</p>
@@ -26,8 +26,8 @@
             <p>Loading...</p>
         </div>
 
-        <div v-if="relatedComics.length > 0" class="related-comics-section">
-            <h3>Meer van {{ comic.series.name }}</h3>
+        <section v-if="relatedComics.length > 0" class="related-comics-section">
+            <h3 class="small-title">Meer van: {{ comic.series.name }}</h3>
             <div class="comic-list">
                 <div v-for="(relatedComic, index) in relatedComics.slice(0, 5)" :key="relatedComic.id"
                     class="comic-card">
@@ -50,7 +50,39 @@
                     Bekijk alle gerelateerde comics
                 </router-link>
             </div>
-        </div>
+        </section>
+
+        <section class="reviews">
+            <h3 class="small-title">Reviews</h3>
+            <div v-if="reviews.length > 0" class="review-list">
+                <div v-for="(review, index) in reviews" :key="index" class="review-item">
+                    <p>{{ review.text }}</p>
+                    <div class="btns">
+                        <button @click="editReview(index)" class="btn">
+                            <i class="ri-pencil-fill"></i>
+                        </button>
+                        <button @click="deleteReview(index)" class="btn">
+                            <i class="ri-delete-bin-6-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p v-else>Er zijn nog geen reviews voor deze comic.</p>
+
+            <h4 class="smaller-title">{{ isEditing ? 'Bewerk je review' : 'Voeg een review toe' }}</h4>
+            <form @submit.prevent="submitReview">
+                <textarea id="review" v-model="newReview" rows="4" cols="50"></textarea>
+            </form>
+            <button type="submit">{{ isEditing ? 'Opslaan' : 'Verstuur' }}</button>
+            <button type="button" v-if="isEditing" @click="cancelEdit" class="btn">Annuleren</button>
+        </section>
+
+        <section class="private-notes-section">
+            <h3 class="small-title">Private Notes</h3>
+            <!--<textarea id="private-notes" rows="4" cols="50"></textarea>
+
+            <button type="submit">Opslaan</button>-->
+        </section>
         <Footer />
     </div>
 </template>
@@ -72,12 +104,17 @@
                 error: null,
                 randomDate: null,
                 relatedComics: [],
-                showPopup: false // Add this line
+                reviews: [],
+                newReview: '',
+                isEditing: false,
+                editIndex: -1,
+                showPopup: false
             };
         },
         created() {
             console.log('Comic ID:', this.id);
             this.fetchComicDetails();
+            this.loadReviews();
             this.loadRandomDate();
         },
         methods: {
@@ -164,12 +201,70 @@
             isInWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 return wishlist.some(item => item.id === comic.id);
+            },
+            addReview() {
+                if (this.newReview.trim()) {
+                    this.reviews.push(this.newReview.trim());
+                    localStorage.setItem(`comic-${this.id}-reviews`, JSON.stringify(this.reviews));
+                    this.newReview = '';
+                }
+            },
+            loadReviews() {
+                const savedReviews = localStorage.getItem(`comic-${this.id}-reviews`);
+                if (savedReviews) {
+                    this.reviews = JSON.parse(savedReviews);
+                }
+            },
+            submitReview() {
+                if (this.newReview.trim()) {
+                    if (this.isEditing) {
+                        this.reviews.splice(this.editIndex, 1, { text: this.newReview });
+                        this.isEditing = false;
+                        this.editIndex = -1;
+                    } else {
+                        this.reviews.push({ text: this.newReview });
+                    }
+                    localStorage.setItem(`comic-${this.id}-reviews`, JSON.stringify(this.reviews));
+                    this.newReview = '';
+                }
+            },
+            editReview(index) {
+                this.newReview = this.reviews[index].text;
+                this.isEditing = true;
+                this.editIndex = index;
+            },
+            deleteReview(index) {
+                this.reviews.splice(index, 1);
+                localStorage.setItem(`comic-${this.id}-reviews`, JSON.stringify(this.reviews));
+            },
+            cancelEdit() {
+                this.newReview = '';
+                this.isEditing = false;
+                this.editIndex = -1;
             }
         }
     };
 </script>
 
 <style scoped>
+    .title {
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .small-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .smaller-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
     .back-button {
         display: inline-block;
         background-color: #CA8A04;
@@ -295,5 +390,78 @@
         margin-top: 20px;
         font-size: 1em;
         font-weight: bold;
+    }
+
+    .reviews {
+        margin: 40px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    .review-list {
+        margin-bottom: 20px;
+    }
+
+    .review-item {
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btns {
+        display: flex;
+    }
+
+    .btn {
+        margin-left: 10px;
+    }
+
+    .reviews h4 {
+        margin-top: 20px;
+    }
+
+    .reviews form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .reviews label {
+        margin-bottom: 5px;
+    }
+
+    .reviews textarea {
+        resize: none;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .reviews button {
+        align-self: flex-start;
+        padding: 10px 20px;
+        background-color: #CA8A04;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .reviews button:hover {
+        background-color: #E0A800;
+    }
+
+    .private-notes-section {
+        margin: 40px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
     }
 </style>
