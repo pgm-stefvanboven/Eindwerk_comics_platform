@@ -1,21 +1,52 @@
 <template>
     <div>
         <Header />
-        <router-link to="/comics" class="back-button">Terug naar overzicht</router-link>
+        <router-link to="/comics" class="back-button">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                    <path class="arrow-icon" d="M15 7L10 12L15 17" stroke="#ffffff" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round"></path>
+                </g>
+            </svg>
+        </router-link>
         <div v-if="comic" class="comic-details">
             <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title" class="comic-image">
             <div class="comic-info">
                 <h2 class="title">{{ comic.title }}</h2>
-                <h3 class="small-title">More Details:</h3>
-                <p v-if="comic.format">Formaat: {{ comic.format }}</p>
-                <p v-if="comic.pageCount">Aantal pagina's: {{ comic.pageCount }}</p>
-                <p v-if="comic.modified">Published: {{ formatDate(comic.modified) }}</p>
-                <p v-if="comic.creators && comic.creators.items.length > 0">Gemaakt door:
-                    <span v-for="(creator, index) in comic.creators.items" :key="index">
-                        {{ creator.name }}{{ index < comic.creators.items.length - 1 ? ', ' : '' }} </span>
-                </p>
-                <p v-if="comic.description">{{ comic.description }}</p>
-                <p v-else>{{ generateDescription(comic.title) }}</p>
+                <h3 class="sm-title">More Details:</h3>
+                <div class="details">
+                    <p v-if="comic.format">
+                        <strong>Formaat:</strong> 
+                        {{ comic.format }}
+                    </p>
+                    <p v-if="comic.series">
+                        <strong>Serie:</strong> 
+                        {{ comic.series.name }}
+                    </p>
+                    <p v-if="comic.prices && comic.prices.length > 0">
+                        <strong>Prijs:</strong> 
+                        €{{ comic.prices[0].price }}
+                    </p>
+                    <p v-if="comic.pageCount">
+                        <strong>Aantal pagina's:</strong>
+                        {{ comic.pageCount }}
+                    </p>
+                    <p v-if="comic.modified">
+                        <strong>Published:</strong> 
+                        {{ formatDate(comic.modified) }}
+                    </p>
+                    <p v-if="comic.creators && comic.creators.items.length > 0">
+                        <strong>Gemaakt door: </strong>
+                        <span v-for="(creator, index) in comic.creators.items" :key="index">
+                            {{ creator.name }}{{ index < comic.creators.items.length - 1 ? ', ' : '' }} </span>
+                    </p>
+                    <p>
+                        <strong>Beschrijving:</strong> 
+                        {{ comic.description || generateDescription(comic.title) }}
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -72,9 +103,11 @@
             <h4 class="smaller-title">{{ isEditing ? 'Bewerk je review' : 'Voeg een review toe' }}</h4>
             <form @submit.prevent="submitReview">
                 <textarea id="review" v-model="newReview" rows="4" cols="50"></textarea>
+                <div class="btns">
+                    <button type="submit" v-if="newReview">{{ isEditing ? 'Opslaan' : 'Verstuur' }}</button>
+                    <button type="button" v-if="isEditing" @click="cancelEdit" class="btn">Annuleren</button>
+                </div>
             </form>
-            <button type="submit">{{ isEditing ? 'Opslaan' : 'Verstuur' }}</button>
-            <button type="button" v-if="isEditing" @click="cancelEdit" class="btn">Annuleren</button>
         </section>
 
         <section class="private-notes-section">
@@ -147,7 +180,7 @@
                 }
             },
             generateDescription(title) {
-                return `Dit is een beschrijving van de comic getiteld "${title}". Meer informatie volgt binnenkort.`;
+                return `Dit is een beschrijving van de comic getiteld "${title}". Meer informatie volgt binnenkort. 😉`;
             },
             formatDate(dateStr) {
                 if (!dateStr) return this.getOrCreateRandomDate(this.comic.title);
@@ -253,6 +286,11 @@
         margin-bottom: 10px;
     }
 
+    .sm-title {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
     .small-title {
         font-size: 1.5em;
         font-weight: bold;
@@ -266,19 +304,29 @@
     }
 
     .back-button {
-        display: inline-block;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         background-color: #CA8A04;
         color: white;
-        padding: 10px 20px;
-        border-radius: 25px;
-        text-decoration: none;
+        border-radius: 50px;
         margin-top: 10px;
         margin-left: 40px;
         margin-bottom: -10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 50px;
+        height: 50px;
     }
 
     .back-button:hover {
         background-color: #E0A800;
+    }
+
+    .arrow-icon {
+        transition: transform 0.3s;
+        transform: translateX(-1px);
+        stroke: white;
     }
 
     .comic-details {
@@ -288,6 +336,10 @@
         padding: 20px;
     }
 
+    .details {
+        max-width: 450px;
+    }
+
     .comic-image {
         max-width: 300px;
         margin-right: 20px;
@@ -295,6 +347,7 @@
 
     .comic-info {
         flex: 1;
+        margin-top: -13px;
     }
 
     h2 {
