@@ -1,21 +1,20 @@
 <template>
-    <div>
-        <Header />
+    <Header />
+    <div class="container">
         <div class="comic-cards">
             <a href="/characters" class="all-characters">All characters ></a>
             <section class="main-content">
                 <div class="greeting">
                     <div class="greeting-content">
-                        <h2>Greetings Comicfan!</h2>
+                        <h2 class="intro-title">Greetings Comicfan!</h2>
                         <p>Are you ready to dive deeper into the Marvel Comic Universe? 📚⭐</p>
                         <p>Create your ultimate wishlist and track your adventures through the multiverse. 🌌💥</p>
                     </div>
                     <a href="#" class="wishlist-button">Wishlist</a>
                 </div>
-
                 <div class="popular-characters">
                     <div class="characters-grid">
-                        <h2>Featured Characters</h2>
+                        <h2 class="character-title">Featured Characters</h2>
                         <div class="character" v-for="character in popularCharacters" :key="character.id">
                             <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
                                 :alt="character.name">
@@ -25,11 +24,12 @@
                     </div>
                 </div>
             </section>
-
             <section class="newest-releases">
-                <h2>Newest Releases</h2>
-                <a href="/comics" class="all-releases">All releases ></a>
-                <div class="releases-carousel">
+                <div class="container new-rel-head">
+                    <h2 class="title">Newest Releases</h2>
+                    <a href="/comics" class="all-releases">All releases ></a>
+                </div>
+                <div class="container releases-carousel">
                     <div class="release" v-for="release in newestReleases" :key="release.id">
                         <div class="img-container">
                             <div class="circular-heart" @click="toggleWishlist(release)"
@@ -44,9 +44,8 @@
                 </div>
             </section>
         </div>
-
-        <Footer />
     </div>
+    <Footer />
 </template>
 
 <script>
@@ -150,9 +149,31 @@
 </script>
 
 <style scoped>
+    .container {
+        max-width: 1536px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .intro-title {
+        font-size: 2em;
+    }
+
+    .title {
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .character-title {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
     .main-content {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
+        margin-top: 20px;
     }
 
     .greeting {
@@ -165,14 +186,12 @@
     }
 
     .greeting-content {
-        margin-top: 5%;
-        margin-bottom: 5%;
+        margin: 2% 0
     }
 
     .greeting p {
         max-width: 65%;
-        margin-left: 20%;
-        margin-top: 3%;
+        margin: 3% auto;
     }
 
     .wishlist-button {
@@ -210,64 +229,66 @@
 
     .character-name {
         font-size: 16px;
-        font-weight: bold
+        font-weight: bold;
     }
 
     .characters-grid h2 {
         grid-column: span 2;
-        margin: 0px;
-        margin-top: -2%;
-        margin-bottom: 2%;
-        font-size: 20px;
     }
 
-    .all-characters {
-        width: 9%;
+    .all-releases {
         display: block;
-        text-align: right;
-        margin-top: 10px;
         background-color: #d4a017;
         color: #fff;
         padding: 10px 8px;
         border-radius: 25px;
         text-decoration: none;
-        margin-left: 89%;
-        margin-bottom: 0.5%;
+        text-align: center;
+        margin: 10px auto 0.5%;
+        width: fit-content;
     }
 
-    .all-releases {
-        width: 8%;
+    .all-characters {
         display: block;
-        text-align: center;
         background-color: #d4a017;
         color: #fff;
-        padding: 10px 4px;
+        padding: 10px 8px;
         border-radius: 25px;
         text-decoration: none;
-        margin-left: 90%;
-        margin-top: -2%;
+        margin: 10px 0;
+        width: fit-content;
+        align-self: flex-end;
+        margin-left: auto;
     }
 
     .newest-releases {
         margin-top: 70px;
     }
 
+    .new-rel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
     .newest-releases h2 {
+        flex: 1;
         text-align: center;
-        font-size: 20px;
-        margin-bottom: 1px;
+        margin: 0;
     }
 
     .releases-carousel {
         display: flex;
-        justify-content: unset;
+        justify-content: space-between;
         margin-top: 10px;
+        margin-bottom: 90px;
     }
 
     .release {
+        position: relative;
         flex: 0 0 auto;
-        margin-left: 29.5px;
-        margin-right: 75.3px;
+        margin: 0 15px;
         width: 200px;
         height: 300px;
     }
@@ -283,167 +304,6 @@
         margin-top: 5px;
         font-size: 16px;
         font-weight: bold;
-    }
-
-    .comic-cards {
-        max-width: 1536px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-
-    h1 {
-        font-size: 2rem;
-        margin-bottom: 20px;
-    }
-
-    h2 {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-    }
-
-    .about {
-        margin-top: 50px;
-        padding: 20px;
-    }
-
-    .about-title {
-        font-size: 24px;
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    .about-content {
-        display: flex;
-        align-items: center;
-    }
-
-    .about-content-left {
-        flex: 0 0 30%;
-    }
-
-    .about-logo {
-        width: 100%;
-        max-width: 200px;
-        display: block;
-        margin: 0 auto;
-    }
-
-    .about-content-right {
-        max-width: 53%;
-        flex: 1;
-        padding: 20px;
-    }
-
-    .about-description {
-        font-size: 18px;
-        line-height: 1.5;
-        color: #555;
-    }
-
-    .comic-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-    }
-
-    .comic-card {
-        background-color: #f0f0f0;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
-    }
-
-    .comic-card:hover {
-        transform: scale(1.05);
-    }
-
-    .comic-image {
-        width: 100%;
-        height: 79%;
-    }
-
-    .comic-details {
-        padding: 20px;
-    }
-
-    .comic-title {
-        margin-top: 0;
-    }
-
-    .username {
-        font-size: 1.2rem;
-        margin-bottom: 20px;
-    }
-
-    .contact {
-        display: flex;
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .contact-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .contact-title {
-        color: #333;
-        font-size: 24px;
-        margin-bottom: 10px;
-    }
-
-    .contact-info ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .contact-form {
-        margin-top: 20px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    .form-group textarea {
-        resize: vertical;
-    }
-
-    button[type="submit"] {
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    button[type="submit"]:hover {
-        background-color: #0056b3;
-    }
-
-    .contact-image {
-        margin-left: 10px;
-        flex: 0 0 30%;
-        margin-top: 8%;
     }
 
     .circular-heart {
@@ -467,9 +327,5 @@
     .wishlist-added {
         color: #d63031;
         background-color: #d63031;
-    }
-
-    .release {
-        position: relative;
     }
 </style>

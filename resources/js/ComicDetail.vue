@@ -1,121 +1,106 @@
 <template>
     <div>
         <Header />
-        <router-link to="/comics" class="back-button">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
+        <div class="container">
+            <router-link to="/comics" class="back-button">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
                     <path class="arrow-icon" d="M15 7L10 12L15 17" stroke="#ffffff" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round"></path>
-                </g>
-            </svg>
-        </router-link>
-        <div v-if="comic" class="comic-details">
-            <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title" class="comic-image">
-            <div class="comic-info">
-                <h2 class="title">{{ comic.title }}</h2>
-                <h3 class="sm-title">More Details:</h3>
-                <div class="details">
-                    <p v-if="comic.format">
-                        <strong>Formaat:</strong> 
-                        {{ comic.format }}
-                    </p>
-                    <p v-if="comic.series">
-                        <strong>Serie:</strong> 
-                        {{ comic.series.name }}
-                    </p>
-                    <p v-if="comic.prices && comic.prices.length > 0">
-                        <strong>Prijs:</strong> 
-                        €{{ comic.prices[0].price }}
-                    </p>
-                    <p v-if="comic.pageCount">
-                        <strong>Aantal pagina's:</strong>
-                        {{ comic.pageCount }}
-                    </p>
-                    <p v-if="comic.modified">
-                        <strong>Published:</strong> 
-                        {{ formatDate(comic.modified) }}
-                    </p>
-                    <p v-if="comic.creators && comic.creators.items.length > 0">
-                        <strong>Gemaakt door: </strong>
-                        <span v-for="(creator, index) in comic.creators.items" :key="index">
-                            {{ creator.name }}{{ index < comic.creators.items.length - 1 ? ', ' : '' }} </span>
-                    </p>
-                    <p>
-                        <strong>Beschrijving:</strong> 
-                        {{ comic.description || generateDescription(comic.title) }}
-                    </p>
+                </svg>
+            </router-link>
+            <div class="comic-details">
+                <img :src="`${comic.thumbnail.path}.${comic.thumbnail.extension}`" :alt="comic.title"
+                    class="comic-image" />
+                <div class="comic-info">
+                    <h2 class="title">{{ comic.title }}</h2>
+                    <h3 class="sm-title">More Details:</h3>
+                    <div class="details">
+                        <p v-if="comic.format"><strong>Formaat:</strong> {{ comic.format }}</p>
+                        <p v-if="comic.series"><strong>Serie:</strong> {{ comic.series.name }}</p>
+                        <p v-if="comic.prices && comic.prices.length > 0"><strong>Prijs:</strong> €{{
+                            comic.prices[0].price }}</p>
+                        <p v-if="comic.pageCount"><strong>Aantal pagina's:</strong> {{ comic.pageCount }}</p>
+                        <p v-if="comic.modified"><strong>Published:</strong> {{ formatDate(comic.modified) }}</p>
+                        <p v-if="comic.creators && comic.creators.items.length > 0">
+                            <strong>Gemaakt door: </strong>
+                            <span v-for="(creator, index) in comic.creators.items" :key="index">
+                                {{ creator.name }}{{ index < comic.creators.items.length - 1 ? ', ' : '' }} </span>
+                        </p>
+                        <p><strong>Beschrijving:</strong> {{ comic.description || generateDescription(comic.title) }}
+                        </p>
+
+                        <section class="private-notes-section">
+                            <h3 class="small-title">Private Note</h3>
+                            <div v-if="privateNote && !isEditingPrivateNote">
+                                <p>{{ privateNote }}</p>
+                                <div class="btns">
+                                    <button @click="editPrivateNote" class="edit-btn"><i class="ri-pencil-fill"></i>
+                                        Bewerk notitie</button>
+                                    <button @click="deletePrivateNote" class="btn"><i class="ri-delete-bin-6-fill"></i>
+                                        Verwijder notitie</button>
+                                </div>
+                            </div>
+                            <p v-else>Er is nog geen privénotitie voor deze comic.</p>
+                            <form v-if="!privateNote || isEditingPrivateNote" @submit.prevent="submitPrivateNote"
+                                class="private-note-form">
+                                <textarea v-model="newPrivateNote" rows="4" cols="50"></textarea>
+                                <div class="btns" v-if="newPrivateNote.trim().length > 0">
+                                    <button type="submit" class="sent-btn">{{ isEditingPrivateNote ? 'Opslaan' : 'Voeg toe' }}</button>
+                                    <button type="button" @click="cancelPrivateNoteEdit" class="btn">Annuleren</button>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div v-else-if="error">
-            <p>{{ error }}</p>
-        </div>
-        <div v-else>
-            <p>Loading...</p>
-        </div>
-
-        <section v-if="relatedComics.length > 0" class="related-comics-section">
-            <h3 class="small-title">Meer van: {{ comic.series.name }}</h3>
-            <div class="comic-list">
-                <div v-for="(relatedComic, index) in relatedComics.slice(0, 5)" :key="relatedComic.id"
-                    class="comic-card">
-                    <div class="img-container">
-                        <div class="circular-heart" @click="toggleWishlist(relatedComic)"
-                            :class="{ 'wishlist-added': isInWishlist(relatedComic) }">
-                            <i class="ri-heart-line icon"></i>
+            <section v-if="relatedComics.length > 0" class="related-comics-section">
+                <h3 class="small-title">Meer van: {{ comic.series.name }}</h3>
+                <div class="comic-list">
+                    <div v-for="(relatedComic, index) in relatedComics.slice(0, 5)" :key="relatedComic.id"
+                        class="comic-card">
+                        <div class="img-container">
+                            <div class="circular-heart" @click="toggleWishlist(relatedComic)"
+                                :class="{ 'wishlist-added': isInWishlist(relatedComic) }">
+                                <i class="ri-heart-line icon"></i>
+                            </div>
+                            <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }">
+                                <img :src="`${relatedComic.thumbnail.path}.${relatedComic.thumbnail.extension}`"
+                                    :alt="relatedComic.title" />
+                            </router-link>
                         </div>
-                        <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }">
-                            <img :src="relatedComic.thumbnail.path + '.' + relatedComic.thumbnail.extension"
-                                :alt="relatedComic.title">
-                        </router-link>
+                        <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }" class="comic-title">{{
+                            relatedComic.title }}</router-link>
                     </div>
-                    <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }" class="comic-title">
-                        {{ relatedComic.title }}
-                    </router-link>
+                    <router-link v-if="relatedComics.length > 5"
+                        :to="'/series/' + comic.series.resourceURI.split('/').pop()" class="view-all-link">Bekijk alle
+                        gerelateerde comics</router-link>
                 </div>
-                <router-link v-if="relatedComics.length > 5"
-                    :to="'/series/' + comic.series.resourceURI.split('/').pop()" class="view-all-link">
-                    Bekijk alle gerelateerde comics
-                </router-link>
-            </div>
-        </section>
+            </section>
 
-        <section class="reviews">
-            <h3 class="small-title">Reviews</h3>
-            <div v-if="reviews.length > 0" class="review-list">
-                <div v-for="(review, index) in reviews" :key="index" class="review-item">
-                    <p>{{ review.text }}</p>
+            <section class="reviews">
+                <h3 class="small-title">Reviews</h3>
+                <div v-if="reviews.length > 0" class="review-list">
+                    <div v-for="(review, index) in reviews" :key="index" class="review-item">
+                        <p>{{ review.text }}</p>
+                        <div class="btns">
+                            <button @click="editReview(index)" class="btn"><i class="ri-pencil-fill"></i></button>
+                            <button @click="deleteReview(index)" class="btn"><i
+                                    class="ri-delete-bin-6-fill"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <p v-else>Er zijn nog geen reviews voor deze comic.</p>
+                <h4 class="smaller-title">{{ isEditing ? 'Bewerk je review' : 'Voeg een review toe' }}</h4>
+                <form @submit.prevent="submitReview">
+                    <textarea id="review" v-model="newReview" rows="4" cols="50"></textarea>
                     <div class="btns">
-                        <button @click="editReview(index)" class="btn">
-                            <i class="ri-pencil-fill"></i>
-                        </button>
-                        <button @click="deleteReview(index)" class="btn">
-                            <i class="ri-delete-bin-6-fill"></i>
-                        </button>
+                        <button type="submit" v-if="newReview">{{ isEditing ? 'Opslaan' : 'Verstuur' }}</button>
+                        <button type="button" v-if="isEditing" @click="cancelEdit" class="btn">Annuleren</button>
                     </div>
-                </div>
-            </div>
-            <p v-else>Er zijn nog geen reviews voor deze comic.</p>
-
-            <h4 class="smaller-title">{{ isEditing ? 'Bewerk je review' : 'Voeg een review toe' }}</h4>
-            <form @submit.prevent="submitReview">
-                <textarea id="review" v-model="newReview" rows="4" cols="50"></textarea>
-                <div class="btns">
-                    <button type="submit" v-if="newReview">{{ isEditing ? 'Opslaan' : 'Verstuur' }}</button>
-                    <button type="button" v-if="isEditing" @click="cancelEdit" class="btn">Annuleren</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="private-notes-section">
-            <h3 class="small-title">Private Notes</h3>
-            <!--<textarea id="private-notes" rows="4" cols="50"></textarea>
-
-            <button type="submit">Opslaan</button>-->
-        </section>
+                </form>
+            </section>
+        </div>
         <Footer />
     </div>
 </template>
@@ -141,14 +126,23 @@
                 newReview: '',
                 isEditing: false,
                 editIndex: -1,
-                showPopup: false
+                showPopup: false,
+                privateNote: '',
+                newPrivateNote: '',
+                isEditingPrivateNote: false
             };
+        },
+        computed: {
+            isNoteNotEmpty() {
+                return this.newPrivateNote.trim().length > 0;
+            }
         },
         created() {
             console.log('Comic ID:', this.id);
             this.fetchComicDetails();
             this.loadReviews();
             this.loadRandomDate();
+            this.loadPrivateNote();
         },
         methods: {
             async fetchComicDetails() {
@@ -274,12 +268,46 @@
                 this.newReview = '';
                 this.isEditing = false;
                 this.editIndex = -1;
+            },
+            loadPrivateNote() {
+                const savedNote = localStorage.getItem(`comic-${this.id}-private-note`);
+                if (savedNote) {
+                    this.privateNote = savedNote;
+                }
+            },
+            submitPrivateNote() {
+                if (this.newPrivateNote.trim()) {
+                    this.privateNote = this.newPrivateNote.trim();
+                    localStorage.setItem(`comic-${this.id}-private-note`, this.privateNote);
+                    this.isEditingPrivateNote = false;
+                    this.newPrivateNote = '';
+                }
+            },
+            editPrivateNote() {
+                this.newPrivateNote = this.privateNote;
+                this.isEditingPrivateNote = true;
+            },
+            deletePrivateNote() {
+                this.privateNote = '';
+                localStorage.removeItem(`comic-${this.id}-private-note`);
+                this.newPrivateNote = '';
+                this.isEditingPrivateNote = false;
+            },
+            cancelPrivateNoteEdit() {
+                this.newPrivateNote = '';
+                this.isEditingPrivateNote = false;
             }
         }
     };
 </script>
 
 <style scoped>
+    .container {
+        max-width: 1536px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
     .title {
         font-size: 2em;
         font-weight: bold;
@@ -291,14 +319,9 @@
         font-weight: bold;
     }
 
-    .small-title {
-        font-size: 1.5em;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
+    .small-title,
     .smaller-title {
-        font-size: 1.2em;
+        font-size: 1.5em;
         font-weight: bold;
         margin-bottom: 10px;
     }
@@ -310,9 +333,7 @@
         background-color: #CA8A04;
         color: white;
         border-radius: 50px;
-        margin-top: 10px;
-        margin-left: 40px;
-        margin-bottom: -10px;
+        margin: 10px 0;
         cursor: pointer;
         transition: background-color 0.3s;
         width: 50px;
@@ -331,8 +352,8 @@
 
     .comic-details {
         display: flex;
-        align-items: flex-start;
-        margin: 20px;
+        flex-wrap: wrap;
+        margin: -15px -18px;
         padding: 20px;
     }
 
@@ -343,6 +364,9 @@
     .comic-image {
         max-width: 300px;
         margin-right: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
     }
 
     .comic-info {
@@ -350,20 +374,15 @@
         margin-top: -13px;
     }
 
-    h2 {
-        margin-top: 0;
-    }
-
     p {
         margin: 5px 0;
     }
 
     .related-comics-section {
-        margin: 40px;
+        margin: 40px 0;
     }
 
     .comic-list {
-        flex: 3;
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 20px;
@@ -418,13 +437,12 @@
         transform: scale(1.1);
     }
 
-    .wishlist-added .icon {
-        color: black;
+    .wishlist-added {
+        background-color: #d63031;
     }
 
-    .wishlist-added {
-        color: #d63031;
-        background-color: #d63031;
+    .wishlist-added .icon {
+        color: #fff;
     }
 
     .icon {
@@ -446,7 +464,7 @@
     }
 
     .reviews {
-        margin: 40px;
+        margin: 40px 0;
         padding: 20px;
         background-color: #f9f9f9;
         border-radius: 10px;
@@ -471,21 +489,49 @@
         display: flex;
     }
 
-    .btn {
-        margin-left: 10px;
+    .edit-btn {
+        background-color: #CA8A04;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        padding: 5px 10px;
     }
 
-    .reviews h4 {
-        margin-top: 20px;
+    .edit-btn:hover {
+        background-color: #E0A800;
+    }
+
+    .sent-btn {
+        padding: 10px 20px;
+        background-color: #CA8A04;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn {
+        margin-left: 10px;
+        background-color: #CA8A04;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        padding: 5px 10px;
+    }
+
+    .sent-btn:hover,
+    .btn:hover {
+        background-color: #E0A800;
     }
 
     .reviews form {
         display: flex;
         flex-direction: column;
-    }
-
-    .reviews label {
-        margin-bottom: 5px;
     }
 
     .reviews textarea {
@@ -512,9 +558,41 @@
     }
 
     .private-notes-section {
-        margin: 40px;
         padding: 20px;
         background-color: #f9f9f9;
         border-radius: 10px;
+    }
+
+    .private-note-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .private-note-form textarea {
+        max-width: 100%;
+        resize: vertical;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .private-note-form button {
+        align-self: flex-start;
+        padding: 10px 20px;
+        background-color: #CA8A04;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .private-note-form button:hover {
+        background-color: #E0A800;
+    }
+
+    textarea {
+        flex-grow: 1;
     }
 </style>
