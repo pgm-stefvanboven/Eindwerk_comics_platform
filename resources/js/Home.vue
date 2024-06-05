@@ -16,8 +16,7 @@
                     <div class="characters-grid">
                         <h2 class="character-title">Featured Characters</h2>
                         <div class="character" v-for="character in popularCharacters" :key="character.id">
-                            <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
-                                :alt="character.name">
+                            <img :src="character.thumbnail.path + '.' + character.thumbnail.extension" :alt="character.name">
                             <router-link :to="{ name: 'character', params: { id: character.id } }"
                                 class="character-name">{{ character.name }}</router-link>
                         </div>

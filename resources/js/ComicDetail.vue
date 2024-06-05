@@ -8,19 +8,24 @@
                         stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
             </router-link>
-            <div class="comic-details">
-                <img :src="`${comic.thumbnail.path}.${comic.thumbnail.extension}`" :alt="comic.title"
-                    class="comic-image" />
+            <div class="comic-details" v-if="comic">
+                <div class="comic-image-container">
+                    <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.name" class="comic-image">
+                    <div class="circular-heart" @click="toggleWishlist(comic)"
+                        :class="{ 'wishlist-added': isInWishlist(comic) }">
+                        <i class="ri-heart-line icon"></i>
+                    </div>
+                </div>
                 <div class="comic-info">
                     <h2 class="title">{{ comic.title }}</h2>
                     <h3 class="sm-title">More Details:</h3>
                     <div class="details">
                         <p v-if="comic.format"><strong>Formaat:</strong> {{ comic.format }}</p>
                         <p v-if="comic.series"><strong>Serie:</strong> {{ comic.series.name }}</p>
-                        <p v-if="comic.prices && comic.prices.length > 0"><strong>Prijs:</strong> €{{
-                            comic.prices[0].price }}</p>
-                        <p v-if="comic.pageCount"><strong>Aantal pagina's:</strong> {{ comic.pageCount }}</p>
-                        <p v-if="comic.modified"><strong>Published:</strong> {{ formatDate(comic.modified) }}</p>
+                        <p><strong>Prijs:</strong> €{{ comicPrice }}</p>
+                        <p v-if="comic.dates && comic.dates.length > 0"><strong>Uitgegeven op:</strong> {{ randomDate }}
+                        </p>
+                        <p><strong>Aantal pagina's:</strong> {{ comicPageCount }}</p>
                         <p v-if="comic.creators && comic.creators.items.length > 0">
                             <strong>Gemaakt door: </strong>
                             <span v-for="(creator, index) in comic.creators.items" :key="index">
@@ -28,31 +33,35 @@
                         </p>
                         <p><strong>Beschrijving:</strong> {{ comic.description || generateDescription(comic.title) }}
                         </p>
-
-                        <section class="private-notes-section">
-                            <h3 class="small-title">Private Note</h3>
-                            <div v-if="privateNote && !isEditingPrivateNote">
-                                <p>{{ privateNote }}</p>
-                                <div class="btns">
-                                    <button @click="editPrivateNote" class="edit-btn"><i class="ri-pencil-fill"></i>
-                                        Bewerk notitie</button>
-                                    <button @click="deletePrivateNote" class="btn"><i class="ri-delete-bin-6-fill"></i>
-                                        Verwijder notitie</button>
-                                </div>
-                            </div>
-                            <p v-else>Er is nog geen privénotitie voor deze comic.</p>
-                            <form v-if="!privateNote || isEditingPrivateNote" @submit.prevent="submitPrivateNote"
-                                class="private-note-form">
-                                <textarea v-model="newPrivateNote" rows="4" cols="50"></textarea>
-                                <div class="btns" v-if="newPrivateNote.trim().length > 0">
-                                    <button type="submit" class="sent-btn">{{ isEditingPrivateNote ? 'Opslaan' : 'Voeg toe' }}</button>
-                                    <button type="button" @click="cancelPrivateNoteEdit" class="btn">Annuleren</button>
-                                </div>
-                            </form>
-                        </section>
                     </div>
                 </div>
             </div>
+            <div v-else>
+                <p>Loading...</p>
+            </div>
+
+            <section class="private-notes-section">
+                <h3 class="small-title">Private Note</h3>
+                <div v-if="privateNote && !isEditingPrivateNote">
+                    <p>{{ privateNote }}</p>
+                    <div class="btns">
+                        <button @click="editPrivateNote" class="edit-btn"><i class="ri-pencil-fill"></i> Bewerk
+                            notitie</button>
+                        <button @click="deletePrivateNote" class="btn"><i class="ri-delete-bin-6-fill"></i> Verwijder
+                            notitie</button>
+                    </div>
+                </div>
+                <p v-else>Er is nog geen privénotitie voor deze comic.</p>
+                <form v-if="!privateNote || isEditingPrivateNote" @submit.prevent="submitPrivateNote"
+                    class="private-note-form">
+                    <textarea v-model="newPrivateNote" rows="4" cols="50"></textarea>
+                    <div class="btns" v-if="newPrivateNote.trim().length > 0">
+                        <button type="submit" class="sent-btn">{{ isEditingPrivateNote ? 'Opslaan' : 'Voeg toe'
+                            }}</button>
+                        <button type="button" @click="cancelPrivateNoteEdit" class="btn">Annuleren</button>
+                    </div>
+                </form>
+            </section>
 
             <section v-if="relatedComics.length > 0" class="related-comics-section">
                 <h3 class="small-title">Meer van: {{ comic.series.name }}</h3>
@@ -133,8 +142,29 @@
             };
         },
         computed: {
-            isNoteNotEmpty() {
-                return this.newPrivateNote.trim().length > 0;
+            comicPrice() {
+                if (this.comic && this.comic.prices && this.comic.prices.length > 0 && this.comic.prices[0].price > 0) {
+                    return this.comic.prices[0].price.toFixed(2);
+                } else {
+                    let price = localStorage.getItem('comicPrice');
+                    if (!price) {
+                        price = this.generateRandomPrice().toFixed(2);
+                        localStorage.setItem('comicPrice', price);
+                    }
+                    return price;
+                }
+            },
+            comicPageCount() {
+                if (this.comic && this.comic.pageCount > 0) {
+                    return this.comic.pageCount;
+                } else {
+                    let pageCount = localStorage.getItem('pageCount');
+                    if (!pageCount) {
+                        pageCount = this.generateRandomPageCount();
+                        localStorage.setItem('pageCount', pageCount);
+                    }
+                    return pageCount;
+                }
             }
         },
         created() {
@@ -165,41 +195,24 @@
                     const response = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`);
                     if (response.data && response.data.data && response.data.data.results.length > 0) {
                         this.relatedComics = response.data.data.results
-                            .filter(comic => comic.id !== this.comic.id) // Exclude current comic
-                            .sort((a, b) => new Date(a.dates.find(date => date.type === 'onsaleDate').date) - new Date(b.dates.find(date => date.type === 'onsaleDate').date)); // Sorteer op datum
+                            .filter(comic => comic.id !== this.id); // Exclude current comic from related comics
+                    } else {
+                        this.relatedComics = [];
                     }
                 } catch (error) {
                     console.error('Error fetching related comics:', error);
-                    this.error = 'Er is een fout opgetreden bij het ophalen van de gerelateerde comics.';
+                    this.relatedComics = [];
                 }
             },
             generateDescription(title) {
                 return `Dit is een beschrijving van de comic getiteld "${title}". Meer informatie volgt binnenkort. 😉`;
             },
-            formatDate(dateStr) {
-                if (!dateStr) return this.getOrCreateRandomDate(this.comic.title);
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) return this.getOrCreateRandomDate(this.comic.title);
-                return date.toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' });
-            },
-            getOrCreateRandomDate(title) {
-                if (this.randomDate) return this.randomDate;
-                this.randomDate = this.generateRandomDate(title);
-                this.saveRandomDate(this.randomDate);
-                return this.randomDate;
-            },
-            generateRandomDate(title) {
-                const yearMatch = title.match(/\b(19|20)\d{2}\b/);
-                let startDate, endDate;
-                if (yearMatch) {
-                    const year = parseInt(yearMatch[0]);
-                    startDate = new Date(year, 0, 1);
-                    endDate = new Date(year, 11, 31);
-                } else {
-                    startDate = new Date(2000, 0, 1);
-                    endDate = new Date(2024, 11, 31);
-                }
-                const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
+            generateRandomDate() {
+                const startYear = 2003;
+                const endYear = 2024;
+                const start = new Date(startYear, 0, 1);
+                const end = new Date(endYear, 11, 31);
+                const randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
                 return randomDate.toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' });
             },
             saveRandomDate(date) {
@@ -209,8 +222,22 @@
                 const savedDate = localStorage.getItem(`comic-${this.id}-randomDate`);
                 if (savedDate) {
                     this.randomDate = savedDate;
+                } else {
+                    this.randomDate = this.generateRandomDate();
+                    this.saveRandomDate(this.randomDate);
                 }
             },
+            generateRandomPrice() {
+                let price = 0;
+                while (price < 1) {
+                    price = Math.random() * 15;
+                }
+                return price;
+            },
+            generateRandomPageCount() {
+                return Math.floor(Math.random() * 500) + 1;
+            },
+
             toggleWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 const index = wishlist.findIndex(item => item.id === comic.id);
@@ -357,16 +384,30 @@
         padding: 20px;
     }
 
+    .comic-details {
+        position: relative;
+    }
+
     .details {
         max-width: 450px;
     }
 
+    .comic-image-container {
+        position: relative;
+        width: 300px;
+        height: 450px;
+        margin-right: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
     .comic-image {
-        max-width: 300px;
+        width: 300px;
+        height: fit-content;
         margin-right: 20px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        flex-shrink: 0;
+        margin-bottom: 15px;
     }
 
     .comic-info {
@@ -375,7 +416,7 @@
     }
 
     p {
-        margin: 5px 0;
+        margin: 10px 0px;
     }
 
     .related-comics-section {
@@ -442,7 +483,7 @@
     }
 
     .wishlist-added .icon {
-        color: #fff;
+        color: black;
     }
 
     .icon {
