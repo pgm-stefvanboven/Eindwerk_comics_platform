@@ -1,7 +1,7 @@
 # Basis image
 FROM php:8.1-fpm
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
@@ -14,10 +14,13 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
+    libonig-dev \
+    libzip-dev \
+    libxml2-dev \
     supervisor
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install Composer
 COPY --from=composer:2.1 /usr/bin/composer /usr/bin/composer
@@ -28,8 +31,11 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Install dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Set permissions
+RUN chown -R www-data:www-data /var/www
+
+# Install PHP dependencies
+RUN composer install --optimize-autoloader --no-dev --prefer-dist --no-progress --no-suggest --verbose
 
 # Optimize application
 RUN php artisan config:cache
