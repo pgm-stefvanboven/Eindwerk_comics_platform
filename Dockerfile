@@ -34,9 +34,6 @@ COPY . /var/www
 # Set permissions
 RUN chown -R www-data:www-data /var/www
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev --prefer-dist --no-progress --no-suggest --verbose
-
 # Optimize application
 RUN php artisan config:cache
 RUN php artisan route:cache
