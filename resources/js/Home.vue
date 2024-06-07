@@ -10,13 +10,14 @@
                         <p>Are you ready to dive deeper into the Marvel Comic Universe? 📚⭐</p>
                         <p>Create your ultimate wishlist and track your adventures through the multiverse. 🌌💥</p>
                     </div>
-                    <a href="#" class="wishlist-button">Wishlist</a>
+                    <a href="/wishlist" class="wishlist-button">Wishlist</a>
                 </div>
                 <div class="popular-characters">
                     <div class="characters-grid">
                         <h2 class="character-title">Featured Characters</h2>
                         <div class="character" v-for="character in popularCharacters" :key="character.id">
-                            <img :src="character.thumbnail.path + '.' + character.thumbnail.extension" :alt="character.name">
+                            <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
+                                :alt="character.name">
                             <router-link :to="{ name: 'character', params: { id: character.id } }"
                                 class="character-name">{{ character.name }}</router-link>
                         </div>
@@ -45,6 +46,11 @@
         </div>
     </div>
     <Footer />
+    <div v-if="showPopup" class="popup">
+        <p class="popup-text">{{ popupMessage }}</p>
+        <a href="/wishlist" class="button">Ga naar wishlist</a>
+        <button @click="showPopup = false">Sluiten</button>
+    </div>
 </template>
 
 <script>
@@ -66,7 +72,9 @@
             return {
                 comics: [],
                 popularCharacters: [],
-                newestReleases: []
+                newestReleases: [],
+                showPopup: false,
+                popupMessage: '' // Voeg deze regel toe
             };
         },
         created() {
@@ -129,20 +137,21 @@
                 let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 return wishlist.some(item => item.id === release.id);
             },
-
             toggleWishlist(release) {
                 let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 const index = wishlist.findIndex(item => item.id === release.id);
-                if (index === -1) {
-                    wishlist.push(release);
-                    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                    alert(`${release.title} added to wishlist!`);
-                } else {
+
+                if (index !== -1) {
                     wishlist.splice(index, 1);
-                    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                    alert(`${release.title} removed from wishlist!`);
+                    this.popupMessage = `${release.title} verwijderd uit wishlist.`;
+                } else {
+                    wishlist.push(release);
+                    this.popupMessage = `${release.title} toegevoegd aan wishlist.`;
                 }
-            },
+
+                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                this.showPopup = true;
+            }
         }
     };
 </script>
@@ -307,24 +316,73 @@
 
     .circular-heart {
         position: absolute;
-        top: 5px;
-        right: 5px;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
         width: 30px;
         height: 30px;
-        border-radius: 50%;
-        background-color: rgba(0, 0, 0, 0.5);
         display: flex;
         justify-content: center;
         align-items: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+        z-index: 10;
     }
 
-    .circular-heart i {
-        font-size: 1.5rem;
-        color: #fff;
+    .circular-heart:hover {
+        transform: scale(1.1);
+    }
+
+    .wishlist-added .icon {
+        color: black;
     }
 
     .wishlist-added {
         color: #d63031;
         background-color: #d63031;
+    }
+
+    .icon {
+        font-size: 20px;
+    }
+
+    .popup {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+    }
+
+    .button {
+        background-color: #CA8A04;
+        border: none;
+        color: white;
+        padding: 5px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        cursor: pointer;
+        transition-duration: 0.4s;
+        border-radius: 25px;
+        margin-right: 10px;
+    }
+
+    .popup-text {
+        margin-bottom: 10px;
+    }
+
+    .popup button {
+        background-color: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
     }
 </style>

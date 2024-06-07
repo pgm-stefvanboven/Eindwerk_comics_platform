@@ -55,7 +55,7 @@
         </section>
         <Footer />
         <div v-if="showPopup" class="popup">
-            <p>Comic toegevoegd aan de wishlist!</p>
+            <p class="popup-text">{{ popupMessage }}</p>
             <a href="/wishlist" class="button">Ga naar wishlist</a>
             <button @click="showPopup = false">Sluiten</button>
         </div>
@@ -91,7 +91,8 @@
                     series: [],
                     writers: []
                 },
-                showPopup: false
+                showPopup: false,
+                popupMessage: ''
             };
         },
         created() {
@@ -213,38 +214,34 @@
                     this.currentPage++;
                 }
             },
-            toggleWishlist(comic) {
-                const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-                const index = wishlist.findIndex(item => item.id === comic.id);
-                if (index !== -1) {
-                    wishlist.splice(index, 1); // Remove from wishlist
-                } else {
-                    wishlist.push(comic); // Add to wishlist
-                    this.showPopup = true; // Show the popup when a comic is added
-                    setTimeout(() => {
-                        this.showPopup = false;
-                    }, 3000); // Hide the popup after 3 seconds
-                }
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-            },
             isInWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 return wishlist.some(item => item.id === comic.id);
+            },
+            toggleWishlist(comic) {
+                const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+                const comicIndex = wishlist.findIndex(item => item.id === comic.id);
+
+                if (comicIndex !== -1) {
+                    wishlist.splice(comicIndex, 1);
+                    this.popupMessage = `${comic.title} verwijderd uit wishlist.`;
+                } else {
+                    wishlist.push(comic);
+                    this.popupMessage = `${comic.title} toegevoegd aan wishlist.`;
+                }
+
+                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                this.showPopup = true;
             }
         },
         computed: {
             paginatedComics() {
-                const startIndex = (this.currentPage - 1) * this.comicsPerPage;
-                return this.filteredComics.slice(startIndex, startIndex + this.comicsPerPage);
+                const start = (this.currentPage - 1) * this.comicsPerPage;
+                const end = start + this.comicsPerPage;
+                return this.filteredComics.slice(start, end);
             },
             totalPages() {
                 return Math.ceil(this.filteredComics.length / this.comicsPerPage);
-            }
-        },
-        watch: {
-            filters: {
-                handler: 'filterComics',
-                deep: true
             }
         }
     };
@@ -402,21 +399,6 @@
         background-color: #FFD700;
     }
 
-    .button {
-        background-color: #CA8A04;
-        border: none;
-        color: white;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        cursor: pointer;
-        transition-duration: 0.4s;
-        border-radius: 25px;
-        margin-left: 20px;
-    }
-
     .button:hover {
         background-color: #FFD700;
     }
@@ -472,9 +454,6 @@
         padding: 10px 20px;
         border-radius: 5px;
         z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
     }
 
     .popup button {
@@ -483,6 +462,5 @@
         color: white;
         cursor: pointer;
         font-size: 16px;
-        margin-left: 20px;
     }
 </style>
