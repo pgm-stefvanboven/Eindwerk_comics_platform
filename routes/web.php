@@ -7,6 +7,7 @@ use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
+
 Route::get('/{any}', function () {
     return view('index');
 })->where('any', '.*');

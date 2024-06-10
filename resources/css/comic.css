@@ -1,0 +1,331 @@
+.container {
+    max-width: 1536px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.title {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.sm-title {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.small-title,
+.smaller-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.back-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #CA8A04;
+    color: white;
+    border-radius: 50px;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 50px;
+    height: 50px;
+}
+
+.back-button:hover {
+    background-color: #E0A800;
+}
+
+.arrow-icon {
+    transition: transform 0.3s;
+    transform: translateX(-1px);
+    stroke: white;
+}
+
+.comic-details {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -15px -18px;
+    padding: 20px;
+}
+
+.comic-details {
+    position: relative;
+}
+
+.details {
+    max-width: 450px;
+}
+
+.comic-image-container {
+    position: relative;
+    width: 300px;
+    height: 450px;
+    margin-right: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.comic-image {
+    width: 300px;
+    height: fit-content;
+    margin-right: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.comic-info {
+    flex: 1;
+    margin-top: -13px;
+}
+
+p {
+    margin: 10px 0px;
+}
+
+.related-comics-section {
+    margin: 40px 0;
+}
+
+.comic-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.comic-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.img-container {
+    position: relative;
+    width: 100%;
+    padding-top: 150%;
+    overflow: hidden;
+    border-radius: 10px;
+    transition: box-shadow 0.3s;
+}
+
+.img-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    transition: transform 0.3s;
+}
+
+.img-container:hover img {
+    transform: scale(1.05);
+}
+
+.circular-heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    z-index: 10;
+}
+
+.circular-heart:hover {
+    transform: scale(1.1);
+}
+
+.wishlist-added {
+    background-color: #d63031;
+}
+
+.wishlist-added .icon {
+    color: black;
+}
+
+.icon {
+    font-size: 20px;
+}
+
+.popup {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.popup button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 20px;
+}
+
+.comic-title {
+    margin-top: 10px;
+    font-size: 1.2em;
+    text-align: center;
+    font-weight: bold;
+}
+
+.view-all-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.reviews {
+    margin: 40px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+.review-list {
+    margin-bottom: 20px;
+}
+
+.review-item {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btns {
+    display: flex;
+}
+
+.edit-btn {
+    background-color: #CA8A04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 5px 10px;
+}
+
+.edit-btn:hover {
+    background-color: #E0A800;
+}
+
+.sent-btn {
+    padding: 10px 20px;
+    background-color: #CA8A04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn {
+    margin-left: 10px;
+    background-color: #CA8A04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 5px 10px;
+}
+
+.sent-btn:hover,
+.btn:hover {
+    background-color: #E0A800;
+}
+
+.reviews form {
+    display: flex;
+    flex-direction: column;
+}
+
+.reviews textarea {
+    resize: none;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.reviews button {
+    align-self: flex-start;
+    padding: 10px 20px;
+    background-color: #CA8A04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.reviews button:hover {
+    background-color: #E0A800;
+}
+
+.private-notes-section {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+.private-note-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.private-note-form textarea {
+    max-width: 100%;
+    resize: vertical;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.private-note-form button {
+    align-self: flex-start;
+    padding: 10px 20px;
+    background-color: #CA8A04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.private-note-form button:hover {
+    background-color: #E0A800;
+}
+
+textarea {
+    flex-grow: 1;
+}

@@ -11,17 +11,17 @@
                     <div class="filter">
                         <label for="characters">Characters</label>
                         <v-select id="characters" v-model="filters.characters" :options="characters" label="name"
-                            :reduce="character => character.id" :multiple="true" />
+                            :reduce="character => character.id" :multiple="true" @input="filterComics" />
                     </div>
                     <div class="filter">
                         <label for="series">Series</label>
                         <v-select id="series" v-model="filters.series" :options="seriesList" label="title"
-                            :reduce="series => series.id" :multiple="true" />
+                            :reduce="series => series.id" :multiple="true" @input="filterComics" />
                     </div>
                     <div class="filter">
                         <label for="writers">Writers</label>
                         <v-select id="writers" v-model="filters.writers" :options="writers" label="fullName"
-                            :reduce="writer => writer.id" :multiple="true" />
+                            :reduce="writer => writer.id" :multiple="true" @input="filterComics" />
                     </div>
                 </div>
 
@@ -108,6 +108,7 @@
                         this.comics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
                         this.filteredComics = this.comics;
                         this.isLoading = false;
+                        console.log("Comics fetched:", this.comics); // Debugging log
                     })
                     .catch(error => {
                         console.error('Error fetching comics:', error);
@@ -140,6 +141,23 @@
                         console.error('Error fetching writers:', error);
                     });
             },
+            fetchFilteredComics() {
+                const characterFilter = this.filters.characters.length ? `characters=${this.filters.characters.join(',')}&` : '';
+                const seriesFilter = this.filters.series.length ? `series=${this.filters.series.join(',')}&` : '';
+                const writersFilter = this.filters.writers.length ? `creators=${this.filters.writers.join(',')}&` : '';
+
+                const filterQuery = characterFilter + seriesFilter + writersFilter;
+
+                axios.get(`https://gateway.marvel.com/v1/public/comics?${filterQuery}ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
+                    .then(response => {
+                        this.filteredComics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
+                        this.isLoadingFilteredComics = false;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching filtered comics:', error);
+                        this.isLoadingFilteredComics = false;
+                    });
+            },
             filterComics() {
                 this.isLoadingFilteredComics = true;
                 this.filteredComics = this.comics.filter(comic => {
@@ -154,55 +172,10 @@
                 });
 
                 if (this.filteredComics.length === 0) {
-                    // Fetch comics for each character, series, and writer individually if no comics are found in the initial filter
-                    if (this.filters.characters.length > 0) {
-                        this.filters.characters.forEach(characterId => {
-                            this.fetchComicsByCharacter(characterId);
-                        });
-                    }
-                    if (this.filters.series.length > 0) {
-                        this.filters.series.forEach(seriesId => {
-                            this.fetchComicsBySeries(seriesId);
-                        });
-                    }
-                    if (this.filters.writers.length > 0) {
-                        this.filters.writers.forEach(creatorId => {
-                            this.fetchComicsByWriter(creatorId);
-                        });
-                    }
+                    this.fetchFilteredComics();
                 } else {
                     this.isLoadingFilteredComics = false;
                 }
-            },
-            fetchComicsByCharacter(characterId) {
-                axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
-                    .then(response => {
-                        this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
-                        this.isLoadingFilteredComics = false;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching comics by character:', error);
-                    });
-            },
-            fetchComicsBySeries(seriesId) {
-                axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
-                    .then(response => {
-                        this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
-                        this.isLoadingFilteredComics = false;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching comics by series:', error);
-                    });
-            },
-            fetchComicsByWriter(creatorId) {
-                axios.get(`https://gateway.marvel.com/v1/public/creators/${creatorId}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
-                    .then(response => {
-                        this.filteredComics = this.filteredComics.concat(response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found'));
-                        this.isLoadingFilteredComics = false;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching comics by writer:', error);
-                    });
             },
             previousPage() {
                 if (this.currentPage > 1) {
@@ -242,6 +215,15 @@
             },
             totalPages() {
                 return Math.ceil(this.filteredComics.length / this.comicsPerPage);
+            }
+        },
+        watch: {
+            filters: {
+                handler() {
+                    this.filterComics();
+                    this.currentPage = 1;
+                },
+                deep: true
             }
         }
     };

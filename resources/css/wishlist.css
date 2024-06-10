@@ -1,0 +1,105 @@
+.title {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.empty-content {
+    max-width: 740px;
+    text-align: center;
+    margin: 2rem auto;
+}
+
+.empty-txt {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.browse-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.browse-link:hover {
+    background-color: #0056b3;
+}
+
+.comics-carousel {
+    display: flex;
+    justify-content: unset;
+    margin-top: 10px;
+}
+
+.comic {
+    flex: 0 0 auto;
+    margin-left: 29.5px;
+    margin-right: 75.3px;
+    width: 200px;
+    height: 300px;
+}
+
+.comic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.img-container {
+    position: relative;
+    width: 100%;
+    padding-top: 150%;
+    overflow: hidden;
+}
+
+.img-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.circular-heart {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: white;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.circular-heart.wishlist-added {
+    background-color: red;
+}
+
+.icon {
+    font-size: 1.5rem;
+}
+
+.comic-name {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.comic-name:hover {
+    text-decoration: underline;
+}
