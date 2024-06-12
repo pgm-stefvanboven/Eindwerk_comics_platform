@@ -142,38 +142,56 @@
                     });
             },
             fetchFilteredComics() {
+                // Prepare character filter query string if characters filter is applied
                 const characterFilter = this.filters.characters.length ? `characters=${this.filters.characters.join(',')}&` : '';
+                // Prepare series filter query string if series filter is applied
                 const seriesFilter = this.filters.series.length ? `series=${this.filters.series.join(',')}&` : '';
+                // Prepare writers filter query string if writers filter is applied
                 const writersFilter = this.filters.writers.length ? `creators=${this.filters.writers.join(',')}&` : '';
 
+                // Combine all filter query strings
                 const filterQuery = characterFilter + seriesFilter + writersFilter;
 
+                // Make a GET request to the Marvel API with the combined filters
                 axios.get(`https://gateway.marvel.com/v1/public/comics?${filterQuery}ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`)
                     .then(response => {
+                        // Filter the response to exclude comics with missing or "image_not_found" thumbnails
                         this.filteredComics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
+                        // Set loading state to false
                         this.isLoadingFilteredComics = false;
                     })
                     .catch(error => {
+                        // Log any errors to the console
                         console.error('Error fetching filtered comics:', error);
+                        // Set loading state to false in case of error
                         this.isLoadingFilteredComics = false;
                     });
             },
+
             filterComics() {
+                // Set loading state to true
                 this.isLoadingFilteredComics = true;
+                // Filter comics based on selected character, series, and writer filters
                 this.filteredComics = this.comics.filter(comic => {
+                    // Check if comic matches selected characters
                     const matchesCharacters = this.filters.characters.length === 0 || comic.characters.items.some(character =>
                         this.filters.characters.includes(character.resourceURI.split('/').pop())
                     );
+                    // Check if comic matches selected series
                     const matchesSeries = this.filters.series.length === 0 || this.filters.series.includes(comic.series.resourceURI.split('/').pop());
+                    // Check if comic matches selected writers
                     const matchesWriters = this.filters.writers.length === 0 || comic.creators.items.some(creator =>
                         this.filters.writers.includes(creator.resourceURI.split('/').pop())
                     );
+                    // Return true if comic matches all filters
                     return matchesCharacters && matchesSeries && matchesWriters;
                 });
 
+                // If no comics match the filters, fetch filtered comics from the API
                 if (this.filteredComics.length === 0) {
                     this.fetchFilteredComics();
                 } else {
+                    // Set loading state to false if matching comics are found
                     this.isLoadingFilteredComics = false;
                 }
             },
@@ -370,6 +388,21 @@
         cursor: pointer;
         transition-duration: 0.4s;
         border-radius: 25px;
+    }
+
+    .button {
+        background-color: #CA8A04;
+        border: none;
+        color: white;
+        padding: 5px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        cursor: pointer;
+        transition-duration: 0.4s;
+        border-radius: 25px;
+        margin-right: 10px;
     }
 
     .next,

@@ -26,10 +26,12 @@
                     <div v-else-if="isLoadingFilteredCharacters">
                         <p>Loading...</p>
                     </div>
-                    <div v-else-if="filteredCharacters.length === 0">No characters found</div>
+                    <div v-else-if="filteredCharacters.length === 0">
+                        <p>No characters found</p>
+                    </div>
                     <div v-for="character in paginatedCharacters" :key="character.id" class="character-card">
-                        <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
-                            :alt="character.name">
+                        <img :src="character.thumbnail.path + '.' + character.thumbnail.extension" :alt="character.name"
+                            class="character-image">
                         <router-link :to="{ name: 'character', params: { id: character.id } }" class="character-name">
                             {{ character.name }}
                         </router-link>
@@ -214,15 +216,38 @@
         grid-gap: 20px;
     }
 
-    .character-list img {
+    .character-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+
+    .character-card:hover {
+        transform: scale(1.05);
+    }
+
+    .character-image {
         width: 100%;
-        height: 85%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 10px;
     }
 
     .character-name {
         margin-top: 10px;
         font-size: 1.2em;
         text-align: center;
+        color: #333;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .character-name:hover {
+        color: #CA8A04;
     }
 
     .filters {

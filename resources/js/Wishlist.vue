@@ -180,12 +180,49 @@
     }
 
     .footer {
-        background-color: #FF6A00;
-        color: white;
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         margin-top: 304px;
+    }
+
+    .popup {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+    }
+
+    .popup button {
+        background-color: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button {
+        background-color: #CA8A04;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        transition-duration: 0.4s;
+        border-radius: 25px;
+    }
+
+    button:hover {
+        background-color: #FFD700;
+    }
+
+    .button:hover {
+        background-color: #FFD700;
     }
 </style>
