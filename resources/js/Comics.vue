@@ -39,10 +39,13 @@
                                 :class="{ 'wishlist-added': isInWishlist(comic) }">
                                 <i class="ri-heart-line icon"></i>
                             </div>
-                            <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
+                            <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-title">
+                                <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
+                            </router-link>
                         </div>
-                        <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-title">{{
-                            comic.title }}</router-link>
+                        <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-title">
+                            {{ comic.title }}
+                        </router-link>
                     </div>
                 </div>
             </div>
@@ -309,6 +312,8 @@
     .img-container:hover img {
         transform: scale(1.05);
     }
+
+
 
     .circular-heart {
         position: absolute;

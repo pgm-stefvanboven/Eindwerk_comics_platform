@@ -36,10 +36,13 @@
                                 :class="{ 'wishlist-added': isInWishlist(release) }">
                                 <i class="ri-heart-line icon"></i>
                             </div>
-                            <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
+                            <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">
+                                <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
+                            </router-link>
                         </div>
-                        <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">{{
-                            release.title }}</router-link>
+                        <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">
+                            {{ release.title }}
+                        </router-link>
                     </div>
                 </div>
             </section>
@@ -74,7 +77,7 @@
                 popularCharacters: [],
                 newestReleases: [],
                 showPopup: false,
-                popupMessage: '' // Voeg deze regel toe
+                popupMessage: ''
             };
         },
         created() {
@@ -305,6 +308,23 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    .release .img-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 10px;
+        transition: transform .3s;
+    }
+
+    .release .img-container img {
+        transition: transform 0.2s;
+    }
+
+    .release:hover .img-container img {
+        transform: scale(1.05);
     }
 
     .release-name {

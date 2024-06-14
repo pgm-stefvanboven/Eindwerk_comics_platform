@@ -18,9 +18,13 @@
                         :class="{ 'wishlist-added': isInWishlist(comic) }">
                         <i class="ri-heart-line icon"></i>
                     </div>
-                    <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
+                    <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-name">
+                        <img :src="comic.thumbnail.path + '.' + comic.thumbnail.extension" :alt="comic.title">
+                    </router-link>
                 </div>
-                <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-name">{{ comic.title }}</router-link>
+                <router-link :to="{ name: 'comic', params: { id: comic.id } }" class="comic-name">
+                    {{ comic.title }}
+                </router-link>
             </div>
         </div>
     </div>
@@ -128,11 +132,13 @@
         object-fit: cover;
     }
 
-    .img-container {
+    .comic .img-container {
         position: relative;
         width: 100%;
         padding-top: 150%;
         overflow: hidden;
+        border-radius: 10px;
+        transition: box-shadow 0.3s;
     }
 
     .img-container img {
@@ -141,7 +147,16 @@
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        border-radius: 10px;
+        transition: transform 0.3s;
+    }
+
+    .comic .img-container img {
+        transition: transform 0.2s;
+    }
+
+    .comic:hover .img-container img {
+        transform: scale(1.05);
     }
 
     .circular-heart {
@@ -173,10 +188,6 @@
         margin-top: 5px;
         font-size: 16px;
         font-weight: bold;
-    }
-
-    .comic-name:hover {
-        text-decoration: underline;
     }
 
     .footer {
