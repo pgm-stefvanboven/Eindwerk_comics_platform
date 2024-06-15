@@ -44,32 +44,38 @@
         },
         data() {
             return {
-                wishlist: [],
+                wishlist: [], // Array to store wishlist items
             };
         },
         created() {
-            this.loadWishlist();
+            this.loadWishlist(); // Load the wishlist from local storage when the component is created
         },
         methods: {
+            // Load wishlist from local storage
             loadWishlist() {
-                const storedWishlist = localStorage.getItem('wishlist');
+                const storedWishlist = localStorage.getItem('wishlist'); // Get the wishlist from local storage
                 if (storedWishlist) {
-                    this.wishlist = JSON.parse(storedWishlist);
+                    this.wishlist = JSON.parse(storedWishlist); // Parse and set the wishlist if it exists
                 }
             },
+            // Check if a comic is in the wishlist
             isInWishlist(comic) {
+                // Return true if the comic is found in the wishlist
                 return this.wishlist.some(item => item.id === comic.id);
             },
+            // Add or remove a comic from the wishlist
             toggleWishlist(comic) {
-                const index = this.wishlist.findIndex(item => item.id === comic.id);
+                const index = this.wishlist.findIndex(item => item.id === comic.id); // Find the index of the comic in the wishlist
                 if (index === -1) {
+                    // If the comic is not in the wishlist, add it
                     this.wishlist.push(comic);
-                    localStorage.setItem('wishlist', JSON.stringify(this.wishlist));
-                    alert(`${comic.title} added to wishlist!`);
+                    localStorage.setItem('wishlist', JSON.stringify(this.wishlist)); // Update local storage
+                    alert(`${comic.title} added to wishlist!`); // Show an alert message
                 } else {
+                    // If the comic is in the wishlist, remove it
                     this.wishlist.splice(index, 1);
-                    localStorage.setItem('wishlist', JSON.stringify(this.wishlist));
-                    alert(`${comic.title} removed from wishlist!`);
+                    localStorage.setItem('wishlist', JSON.stringify(this.wishlist)); // Update local storage
+                    alert(`${comic.title} removed from wishlist!`); // Show an alert message
                 }
             },
         }

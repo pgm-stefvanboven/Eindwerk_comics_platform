@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <div class="comic-info">
-                    <h2 class="title">{{ comic.title }}</h2>
+                    <h2 class="comic-detail-title">{{ comic.title }}</h2>
                     <h3 class="sm-title">More Details:</h3>
                     <div class="details">
                         <p v-if="comic.format"><strong>Formaat:</strong> {{ comic.format }}</p>
@@ -51,7 +51,7 @@
                 </div>
                 <div class="comic-detail-list">
                     <div v-for="(relatedComic, index) in relatedComics.slice(0, 5)" :key="relatedComic.id"
-                        class="comic-card">
+                        class="comic-detail-card">
                         <div class="related-comics-img-container">
                             <div class="circular-heart" @click="toggleWishlist(relatedComic)"
                                 :class="{ 'wishlist-added': isInWishlist(relatedComic) }">
@@ -134,25 +134,26 @@
             Header,
             Footer
         },
-        props: ['id'],
+        props: ['id'], // Receive comic ID as a prop
         data() {
             return {
-                comic: null,
-                error: null,
-                randomDate: null,
-                relatedComics: [],
-                reviews: [],
-                newReview: '',
-                isEditing: false,
-                editIndex: -1,
-                showPopup: false,
-                popupMessage: '',
-                privateNote: '',
-                newPrivateNote: '',
-                isEditingPrivateNote: false
+                comic: null, // Comic data
+                error: null, // Error message
+                randomDate: null, // Random date
+                relatedComics: [], // Array of related comics
+                reviews: [], // Array of reviews
+                newReview: '', // New review text
+                isEditing: false, // Flag to check if a review is being edited
+                editIndex: -1, // Index of the review being edited
+                showPopup: false, // Flag to show or hide the popup message
+                popupMessage: '', // Popup message text
+                privateNote: '', // Private note text
+                newPrivateNote: '', // New private note text
+                isEditingPrivateNote: false // Flag to check if a private note is being edited
             };
         },
         computed: {
+            // Compute comic price, generate random price if not available
             comicPrice() {
                 if (this.comic && this.comic.prices && this.comic.prices.length > 0 && this.comic.prices[0].price > 0) {
                     return this.comic.prices[0].price.toFixed(2);
@@ -165,6 +166,7 @@
                     return price;
                 }
             },
+            // Compute comic page count, generate random page count if not available
             comicPageCount() {
                 if (this.comic && this.comic.pageCount > 0) {
                     return this.comic.pageCount;
@@ -178,61 +180,73 @@
                 }
             }
         },
+        watch: {
+            '$route.params.id': 'fetchComic' // Watch for changes in the comic ID and refetch comic
+        },
         created() {
-            this.fetchComic();
-            this.generateRandomDate();
+            this.fetchComic(); // Fetch comic data when component is created
+            this.generateRandomDate(); // Generate a random date when component is created
         },
         methods: {
+            // Fetch comic data from Marvel API
             async fetchComic() {
                 try {
                     const response = await axios.get(`https://gateway.marvel.com/v1/public/comics/${this.id}?ts=1&apikey=82f244ed9c0f202819d3fe45dd4649ac&hash=75a2dd8424de9077cb1018bee9101da5`);
-                    this.comic = response.data.data.results[0];
-                    this.fetchRelatedComics();
+                    this.comic = response.data.data.results[0]; // Store fetched comic data
+                    this.fetchRelatedComics(); // Fetch related comics
                 } catch (error) {
-                    this.error = error.response ? error.response.data : error.message;
+                    this.error = error.response ? error.response.data : error.message; // Handle errors
                     console.error("Failed to fetch comic:", this.error);
                 }
             },
+            // Generate a random date
             generateRandomDate() {
                 const randomDate = new Date(+(new Date()) - Math.floor(Math.random() * 10000000000));
                 const dateString = randomDate.toISOString().split('T')[0];
                 this.randomDate = dateString;
             },
+            // Generate a random price between $3 and $30
             generateRandomPrice() {
                 return (Math.random() * (30 - 3 + 1) + 3).toFixed(2);
             },
+            // Generate a random page count between 32 and 100
             generateRandomPageCount() {
                 return Math.floor(Math.random() * (100 - 32 + 1) + 32);
             },
+            // Generate a description for the comic
             generateDescription(title) {
                 return `No description available for ${title}`;
             },
+            // Fetch related comics from Marvel API
             async fetchRelatedComics() {
                 try {
                     const seriesId = this.comic.series.resourceURI.split('/').pop();
                     const response = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=82f244ed9c0f202819d3fe45dd4649ac&hash=75a2dd8424de9077cb1018bee9101da5`);
-                    this.relatedComics = response.data.data.results.filter(comic => comic.id !== this.comic.id);
+                    this.relatedComics = response.data.data.results.filter(comic => comic.id !== this.comic.id); // Exclude current comic from related comics
                 } catch (error) {
-                    this.error = error.response ? error.response.data : error.message;
+                    this.error = error.response ? error.response.data : error.message; // Handle errors
                     console.error("Failed to fetch related comics:", this.error);
                 }
             },
+            // Toggle comic in wishlist
             toggleWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 const index = wishlist.findIndex(item => item.id === comic.id);
                 if (index !== -1) {
-                    wishlist.splice(index, 1);
+                    wishlist.splice(index, 1); // Remove from wishlist
                     this.showPopupMessage(`${comic.title} is verwijderd uit je verlanglijst!`);
                 } else {
-                    wishlist.push(comic);
+                    wishlist.push(comic); // Add to wishlist
                     this.showPopupMessage(`${comic.title} is toegevoegd aan je verlanglijst!`);
                 }
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                localStorage.setItem('wishlist', JSON.stringify(wishlist)); // Update wishlist in local storage
             },
+            // Check if comic is in wishlist
             isInWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 return wishlist.some(item => item.id === comic.id);
             },
+            // Submit a new review or update an existing review
             submitReview() {
                 if (this.isEditing && this.editIndex !== -1) {
                     this.reviews.splice(this.editIndex, 1, { text: this.newReview });
@@ -244,23 +258,27 @@
                 this.newReview = '';
                 this.isEditing = false;
                 this.editIndex = -1;
-                localStorage.setItem('reviews', JSON.stringify(this.reviews));
+                localStorage.setItem('reviews', JSON.stringify(this.reviews)); // Update reviews in local storage
             },
+            // Delete a review
             deleteReview(index) {
                 this.reviews.splice(index, 1);
                 this.showPopupMessage('Review verwijderd!');
-                localStorage.setItem('reviews', JSON.stringify(this.reviews));
+                localStorage.setItem('reviews', JSON.stringify(this.reviews)); // Update reviews in local storage
             },
+            // Edit a review
             editReview(index) {
                 this.newReview = this.reviews[index].text;
                 this.isEditing = true;
                 this.editIndex = index;
             },
+            // Cancel review edit
             cancelEdit() {
                 this.isEditing = false;
                 this.newReview = '';
                 this.editIndex = -1;
             },
+            // Show a popup message
             showPopupMessage(message) {
                 this.popupMessage = message;
                 this.showPopup = true;
@@ -268,22 +286,26 @@
                     this.showPopup = false;
                 }, 3000);
             },
+            // Submit a new private note
             submitPrivateNote() {
                 this.privateNote = this.newPrivateNote;
                 this.showPopupMessage('Notitie toegevoegd!');
                 this.newPrivateNote = '';
                 this.isEditingPrivateNote = false;
-                localStorage.setItem('privateNote', this.privateNote);
+                localStorage.setItem('privateNote', this.privateNote); // Update private note in local storage
             },
+            // Edit a private note
             editPrivateNote() {
                 this.newPrivateNote = this.privateNote;
                 this.isEditingPrivateNote = true;
             },
+            // Delete a private note
             deletePrivateNote() {
                 this.privateNote = '';
                 this.showPopupMessage('Notitie verwijderd!');
-                localStorage.removeItem('privateNote');
+                localStorage.removeItem('privateNote'); // Remove private note from local storage
             },
+            // Cancel private note edit
             cancelPrivateNoteEdit() {
                 this.newPrivateNote = '';
                 this.isEditingPrivateNote = false;
@@ -300,7 +322,7 @@
         padding: 0 20px;
     }
 
-    .title {
+    .comic-detail-title {
         font-size: 2em;
         font-weight: bold;
         margin-bottom: 10px;
@@ -388,13 +410,13 @@
         margin: 40px 0;
     }
 
-    .comic-list {
+    .comic-detail-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 20px;
     }
 
-    .comic-card {
+    .comic-detail-card {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -492,13 +514,6 @@
         align-items: center;
     }
 
-    .comic-detail-list {
-        display: flex;
-        gap: 20px;
-        justify-content: left;
-        flex-wrap: wrap;
-    }
-
     .comic-card {
         display: flex;
         flex-direction: column;
@@ -524,7 +539,6 @@
     .related-comics-img-container img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
         transition: transform 0.3s;
     }
 

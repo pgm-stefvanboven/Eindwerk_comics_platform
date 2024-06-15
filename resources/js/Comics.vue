@@ -23,6 +23,9 @@
                         <v-select id="writers" v-model="filters.writers" :options="writers" label="fullName"
                             :reduce="writer => writer.id" :multiple="true" @input="filterComics" />
                     </div>
+
+                    <button v-if="showResetButton" @click="resetFilters" class="reset-filter-comics-button">Reset
+                        Filters</button>
                 </div>
 
                 <div class="comic-list">
@@ -34,7 +37,7 @@
                     </div>
                     <div v-else-if="filteredComics.length === 0">No comics found</div>
                     <div v-for="comic in paginatedComics" :key="comic.id" class="comic-card">
-                        <div class="img-container">
+                        <div class="comics-img-container">
                             <div class="circular-heart" @click="toggleWishlist(comic)"
                                 :class="{ 'wishlist-added': isInWishlist(comic) }">
                                 <i class="ri-heart-line icon"></i>
@@ -50,10 +53,12 @@
                 </div>
             </div>
 
-            <div class="pagination">
-                <button v-if="currentPage > 1" @click="previousPage">Vorige</button>
-                <button v-if="currentPage < totalPages" @click="nextPage" class="next">Volgende</button>
+            <div class="pagination-comics">
+                <button @click="previousPage" :class="{ disabled: currentPage === 1 }"
+                    :disabled="currentPage === 1">Vorige</button>
                 <span class="pages">Pagina {{ currentPage }} van {{ totalPages }}</span>
+                <button @click="nextPage" :class="{ disabled: currentPage === totalPages }"
+                    :disabled="currentPage === totalPages" class="next">Volgende</button>
             </div>
         </section>
         <Footer />
@@ -70,47 +75,47 @@
     import Header from './vue-components/Header.vue';
     import Footer from './vue-components/Footer.vue';
     import vSelect from 'vue-select';
-    import 'vue-select/dist/vue-select.css';
 
     export default {
         components: {
-            vSelect,
             Header,
-            Footer
+            Footer,
+            vSelect
         },
         data() {
             return {
-                comics: [],
-                isLoading: true,
-                isLoadingFilteredComics: false,
-                filteredComics: [],
-                characters: [],
-                seriesList: [],
-                writers: [],
-                currentPage: 1,
-                comicsPerPage: 10,
+                comics: [], // Array to store all comics
+                isLoading: true, // Boolean to indicate loading state
+                isLoadingFilteredComics: false, // Boolean to indicate loading state for filtered comics
+                filteredComics: [], // Array to store filtered comics
+                characters: [], // Array to store characters
+                seriesList: [], // Array to store series
+                writers: [], // Array to store writers
+                currentPage: 1, // Current page number for pagination
+                comicsPerPage: 10, // Number of comics to display per page
                 filters: {
-                    characters: [],
-                    series: [],
-                    writers: []
+                    characters: [], // Selected characters for filtering
+                    series: [], // Selected series for filtering
+                    writers: [] // Selected writers for filtering
                 },
-                showPopup: false,
-                popupMessage: ''
+                showPopup: false, // Boolean to control the display of the popup message
+                popupMessage: '', // Message to display in the popup
+                showResetButton: false // Boolean to control the visibility of the reset button
             };
         },
         created() {
-            this.fetchComics();
-            this.fetchCharacters();
-            this.fetchSeries();
-            this.fetchWriters();
+            this.fetchComics(); // Fetch all comics when the component is created
+            this.fetchCharacters(); // Fetch all characters when the component is created
+            this.fetchSeries(); // Fetch all series when the component is created
+            this.fetchWriters(); // Fetch all writers when the component is created
         },
         methods: {
             fetchComics() {
                 axios.get('https://gateway.marvel.com/v1/public/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471')
                     .then(response => {
                         this.comics = response.data.data.results.filter(comic => comic.thumbnail && comic.thumbnail.path !== 'image_not_found');
-                        this.filteredComics = this.comics;
-                        this.isLoading = false;
+                        this.filteredComics = this.comics; // Initialize filtered comics with all comics
+                        this.isLoading = false; // Set loading state to false
                         console.log("Comics fetched:", this.comics); // Debugging log
                     })
                     .catch(error => {
@@ -174,76 +179,113 @@
             filterComics() {
                 // Set loading state to true
                 this.isLoadingFilteredComics = true;
-                // Filter comics based on selected character, series, and writer filters
+                // Filter the comics based on the selected characters, series, and writers
                 this.filteredComics = this.comics.filter(comic => {
-                    // Check if comic matches selected characters
+                    // Check if the comic matches the selected characters
                     const matchesCharacters = this.filters.characters.length === 0 || comic.characters.items.some(character =>
                         this.filters.characters.includes(character.resourceURI.split('/').pop())
                     );
-                    // Check if comic matches selected series
+                    // Check if the comic matches the selected series
                     const matchesSeries = this.filters.series.length === 0 || this.filters.series.includes(comic.series.resourceURI.split('/').pop());
-                    // Check if comic matches selected writers
+                    // Check if the comic matches the selected writers
                     const matchesWriters = this.filters.writers.length === 0 || comic.creators.items.some(creator =>
                         this.filters.writers.includes(creator.resourceURI.split('/').pop())
                     );
-                    // Return true if comic matches all filters
+                    // Return true if the comic matches all selected filters
                     return matchesCharacters && matchesSeries && matchesWriters;
                 });
 
-                // If no comics match the filters, fetch filtered comics from the API
+                // Show the reset button if any filters are applied
+                this.showResetButton = this.filters.characters.length > 0 || this.filters.series.length > 0 || this.filters.writers.length > 0;
+
+                // If no comics match the filters and characters filter is applied, fetch comics by characters
                 if (this.filteredComics.length === 0) {
                     this.fetchFilteredComics();
                 } else {
-                    // Set loading state to false if matching comics are found
+                    // Set loading state to false
                     this.isLoadingFilteredComics = false;
                 }
             },
+            // Reset all filters and show all comics
+            resetFilters() {
+                // Reset all filters to empty arrays
+                this.filters.characters = [];
+                // Reset all filters to empty arrays
+                this.filters.series = [];
+                // Reset all filters to empty arrays
+                this.filters.writers = [];
+                // Show all comics
+                this.filteredComics = this.comics;
+                // Hide the reset button
+                this.showResetButton = false;
+                // Reset the current page to 1
+                this.currentPage = 1;
+            },
+            // Fetch the previous page of comics
             previousPage() {
+                // Check if the current page is greater than 1
                 if (this.currentPage > 1) {
                     this.currentPage--;
                 }
             },
+            // Fetch the next page of comics
             nextPage() {
+                // Check if the current page is less than the total number of pages
                 if (this.currentPage < this.totalPages) {
                     this.currentPage++;
                 }
             },
+            // Check if a comic is in the wishlist
             isInWishlist(comic) {
+                // Get the wishlist from local storage or an empty array if it doesn't exist
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+                // Check if the comic is in the wishlist
                 return wishlist.some(item => item.id === comic.id);
             },
+            // Add or remove a comic from the wishlist
             toggleWishlist(comic) {
+                // Get the wishlist from local storage or an empty array if it doesn't exist
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+                // Find the index of the comic in the wishlist
                 const comicIndex = wishlist.findIndex(item => item.id === comic.id);
-
+                // If the comic is in the wishlist, remove it; otherwise, add it
                 if (comicIndex !== -1) {
                     wishlist.splice(comicIndex, 1);
-                    this.popupMessage = `${comic.title} verwijderd uit wishlist.`;
+                    this.popupMessage = `${comic.title} removed from wishlist.`; // Show removed message
                 } else {
                     wishlist.push(comic);
-                    this.popupMessage = `${comic.title} toegevoegd aan wishlist.`;
+                    this.popupMessage = `${comic.title} added to wishlist.`; // Show added message
                 }
-
+                // Save the updated wishlist to local storage
                 localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                this.showPopup = true;
+                this.showPopup = true; // Show the popup message
             }
         },
+        // Computed properties for pagination and filtering
         computed: {
+            // Get the list of comics for the current page
             paginatedComics() {
+                // Calculate the start and end index of the current page
                 const start = (this.currentPage - 1) * this.comicsPerPage;
                 const end = start + this.comicsPerPage;
+                // Return the comics for the current page
                 return this.filteredComics.slice(start, end);
             },
+            // Calculate the total number of pages based on the number of filtered comics and the number of comics per page
             totalPages() {
                 return Math.ceil(this.filteredComics.length / this.comicsPerPage);
             }
         },
+        // Watch for changes in the filters and update the filtered comics
         watch: {
             filters: {
                 handler() {
+                    // Call the filterComics method when the filters change
                     this.filterComics();
+                    // Reset the current page to 1 when the filters change
                     this.currentPage = 1;
                 },
+                // Deep watch to detect changes in nested properties of the filters object
                 deep: true
             }
         }
@@ -269,7 +311,7 @@
     }
 
     .comics-title {
-        margin-right: 840px;
+        margin-right: 830px;
     }
 
     .content {
@@ -290,7 +332,7 @@
         align-items: center;
     }
 
-    .img-container {
+    .comics-img-container {
         position: relative;
         width: 100%;
         padding-top: 150%;
@@ -299,7 +341,7 @@
         transition: box-shadow 0.3s;
     }
 
-    .img-container img {
+    .comics-img-container img {
         position: absolute;
         top: 0;
         left: 0;
@@ -309,11 +351,9 @@
         transition: transform 0.3s;
     }
 
-    .img-container:hover img {
+    .comics-img-container:hover img {
         transform: scale(1.05);
     }
-
-
 
     .circular-heart {
         position: absolute;
@@ -373,11 +413,29 @@
         margin-bottom: 5px;
     }
 
-    .pagination {
+    .pagination-comics {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
         margin-top: 20px;
+        max-width: 1070px;
+        margin-left: 400px;
+    }
+
+    .pagination-comics .pages {
+        margin: 0 20px;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .pagination-comics button {
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+
+    .pagination-comics button.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
     }
 
     button {
@@ -423,6 +481,26 @@
         background-color: #FFD700;
     }
 
+    .reset-filter-comics-button {
+        background-color: #CA8A04;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        cursor: pointer;
+        transition-duration: 0.4s;
+        border-radius: 25px;
+        margin-right: 10px;
+        margin-top: 20px;
+    }
+
+    .reset-filter-comics-button:hover {
+        background-color: #FFD700;
+    }
+
     @media (max-width: 768px) {
         .comic-list {
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -447,8 +525,17 @@
             flex-direction: column;
         }
 
-        .pagination {
+        .pagination-comics {
             margin-right: 0;
+        }
+
+        .pagination-comics button {
+            margin: 0 5px;
+        }
+
+        .next,
+        .pages {
+            margin-left: 5px;
         }
     }
 

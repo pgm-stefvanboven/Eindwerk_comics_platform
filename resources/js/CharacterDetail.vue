@@ -125,32 +125,33 @@
             Header,
             Footer
         },
-        props: ['id'],
+        props: ['id'], // Receive character ID as a prop
         data() {
             return {
                 character: {
                     series: {
-                        items: []
+                        items: [] // Initialize series items
                     }
                 },
-                error: null,
-                relatedComics: [],
-                reviews: [],
-                newReview: '',
-                isEditing: false,
-                editIndex: -1,
-                showPopup: false,
-                popupMessage: '',
-                privateNote: '',
-                newPrivateNote: '',
-                isEditingPrivateNote: false
+                error: null, // Error message
+                relatedComics: [], // Array of related comics
+                reviews: [], // Array of reviews
+                newReview: '', // New review text
+                isEditing: false, // Flag to check if a review is being edited
+                editIndex: -1, // Index of the review being edited
+                showPopup: false, // Flag to show or hide the popup message
+                popupMessage: '', // Popup message text
+                privateNote: '', // Private note text
+                newPrivateNote: '', // New private note text
+                isEditingPrivateNote: false // Flag to check if a private note is being edited
             };
         },
         created() {
-            console.log('Character ID:', this.id);
-            this.fetchCharacterDetails();
+            console.log('Character ID:', this.id); // Log the character ID for debugging
+            this.fetchCharacterDetails(); // Fetch character details when component is created
         },
         methods: {
+            // Fetch character details from Marvel API
             async fetchCharacterDetails() {
                 try {
                     const response = await axios.get(`https://gateway.marvel.com/v1/public/characters/${this.id}?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`);
@@ -160,23 +161,25 @@
                         this.character = characterData;
                         this.fetchRelatedComics(); // Fetch related comics
                     } else {
-                        this.error = 'Character niet gevonden.';
+                        this.error = 'Character niet gevonden.'; // Handle character not found
                     }
                 } catch (error) {
                     console.error(error);
-                    this.error = 'Er is een fout opgetreden bij het ophalen van het character.';
+                    this.error = 'Er is een fout opgetreden bij het ophalen van het character.'; // Handle errors
                 }
             },
+            // Fetch related comics from Marvel API
             async fetchRelatedComics() {
                 try {
                     const response = await axios.get(`https://gateway.marvel.com/v1/public/characters/${this.id}/comics?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`);
                     if (response.data && response.data.data && response.data.data.results.length > 0) {
-                        this.relatedComics = response.data.data.results;
+                        this.relatedComics = response.data.data.results; // Store related comics
                     }
                 } catch (error) {
-                    console.error(error);
+                    console.error(error); // Handle errors
                 }
             },
+            // Toggle comic in wishlist
             toggleWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 const index = wishlist.findIndex(item => item.id === comic.id);
@@ -187,16 +190,18 @@
                     wishlist.push(comic); // Add to wishlist
                     this.popupMessage = 'Comic toegevoegd aan je wishlist';
                 }
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                localStorage.setItem('wishlist', JSON.stringify(wishlist)); // Update wishlist in local storage
                 this.showPopup = true;
                 setTimeout(() => {
                     this.showPopup = false;
                 }, 3000); // Hide after 3 seconds
             },
+            // Check if comic is in wishlist
             isInWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 return wishlist.some(item => item.id === comic.id);
             },
+            // Submit a new review or update an existing review
             submitReview() {
                 if (this.isEditing && this.editIndex !== -1) {
                     this.reviews.splice(this.editIndex, 1, { text: this.newReview });
@@ -208,23 +213,27 @@
                 this.newReview = '';
                 this.isEditing = false;
                 this.editIndex = -1;
-                localStorage.setItem('reviews', JSON.stringify(this.reviews));
+                localStorage.setItem('reviews', JSON.stringify(this.reviews)); // Update reviews in local storage
             },
+            // Delete a review
             deleteReview(index) {
                 this.reviews.splice(index, 1);
                 this.showPopupMessage('Review verwijderd!');
-                localStorage.setItem('reviews', JSON.stringify(this.reviews));
+                localStorage.setItem('reviews', JSON.stringify(this.reviews)); // Update reviews in local storage
             },
+            // Edit a review
             editReview(index) {
                 this.newReview = this.reviews[index].text;
                 this.isEditing = true;
                 this.editIndex = index;
             },
+            // Cancel review edit
             cancelEdit() {
                 this.isEditing = false;
                 this.newReview = '';
                 this.editIndex = -1;
             },
+            // Show a popup message
             showPopupMessage(message) {
                 this.popupMessage = message;
                 this.showPopup = true;
@@ -232,26 +241,31 @@
                     this.showPopup = false;
                 }, 3000);
             },
+            // Submit a new private note
             submitPrivateNote() {
                 this.privateNote = this.newPrivateNote;
                 this.showPopupMessage('Notitie toegevoegd!');
                 this.newPrivateNote = '';
                 this.isEditingPrivateNote = false;
-                localStorage.setItem('privateNote', this.privateNote);
+                localStorage.setItem('privateNote', this.privateNote); // Update private note in local storage
             },
+            // Edit a private note
             editPrivateNote() {
                 this.newPrivateNote = this.privateNote;
                 this.isEditingPrivateNote = true;
             },
+            // Delete a private note
             deletePrivateNote() {
                 this.privateNote = '';
                 this.showPopupMessage('Notitie verwijderd!');
-                localStorage.removeItem('privateNote');
+                localStorage.removeItem('privateNote'); // Remove private note from local storage
             },
+            // Cancel private note edit
             cancelPrivateNoteEdit() {
                 this.newPrivateNote = '';
                 this.isEditingPrivateNote = false;
             },
+            // Generate a description for the character
             generateDescription(name) {
                 return `Dit is een beschrijving van het character genaamd ${name}. Het is een spannend en boeiend character dat je zeker niet wilt missen!`;
             }
@@ -437,7 +451,6 @@
     .related-comics-img-container img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
         transition: transform 0.3s;
     }
 

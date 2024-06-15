@@ -16,10 +16,14 @@
                     <div class="characters-grid">
                         <h2 class="character-title">Featured Characters</h2>
                         <div class="character" v-for="character in popularCharacters" :key="character.id">
-                            <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
-                                :alt="character.name">
+                            <router-link :to="{ name: 'character', params: { id: character.id } }">
+                                <img :src="character.thumbnail.path + '.' + character.thumbnail.extension"
+                                    :alt="character.name">
+                            </router-link>
                             <router-link :to="{ name: 'character', params: { id: character.id } }"
-                                class="character-name">{{ character.name }}</router-link>
+                                class="populair-character-name">
+                                {{ character.name }}
+                            </router-link>
                         </div>
                     </div>
                 </div>
@@ -37,7 +41,8 @@
                                 <i class="ri-heart-line icon"></i>
                             </div>
                             <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">
-                                <img :src="release.thumbnail.path + '.' + release.thumbnail.extension" :alt="release.title">
+                                <img :src="release.thumbnail.path + '.' + release.thumbnail.extension"
+                                    :alt="release.title">
                             </router-link>
                         </div>
                         <router-link :to="{ name: 'comic', params: { id: release.id } }" class="release-name">
@@ -61,6 +66,7 @@
     import Header from './vue-components/Header.vue';
     import Footer from './vue-components/Footer.vue';
 
+    // Constants for API details
     const API_URL = 'https://gateway.marvel.com/v1/public';
     const API_KEY = 'e8d09a0b604fd41537ada8adabcf6b4b';
     const HASH = 'c7a4fd72acd5f90bf5b877329faea471';
@@ -73,87 +79,94 @@
         },
         data() {
             return {
-                comics: [],
-                popularCharacters: [],
-                newestReleases: [],
-                showPopup: false,
-                popupMessage: ''
+                comics: [], // Array to store comics data
+                popularCharacters: [], // Array to store popular characters data
+                newestReleases: [], // Array to store newest releases data
+                showPopup: false, // Boolean to control popup visibility
+                popupMessage: '' // String to store popup message
             };
         },
         created() {
-            this.loadCachedData();
-            this.fetchDataWithBackoff('popularCharacters', this.fetchPopularCharacters);
-            this.fetchDataWithBackoff('newestReleases', this.fetchNewestReleases);
+            this.loadCachedData(); // Load cached data from local storage when the component is created
+            this.fetchDataWithBackoff('popularCharacters', this.fetchPopularCharacters); // Fetch popular characters with backoff mechanism
+            this.fetchDataWithBackoff('newestReleases', this.fetchNewestReleases); // Fetch newest releases with backoff mechanism
         },
         methods: {
+            // Load cached data from local storage
             loadCachedData() {
                 const cachedCharacters = localStorage.getItem('popularCharacters');
                 if (cachedCharacters) {
-                    this.popularCharacters = JSON.parse(cachedCharacters);
+                    this.popularCharacters = JSON.parse(cachedCharacters); // Load popular characters from local storage if available
                 }
                 const cachedReleases = localStorage.getItem('newestReleases');
                 if (cachedReleases) {
-                    this.newestReleases = JSON.parse(cachedReleases);
+                    this.newestReleases = JSON.parse(cachedReleases); // Load newest releases from local storage if available
                 }
             },
+            // Fetch data with exponential backoff in case of rate limiting (429 error)
             async fetchDataWithBackoff(dataType, fetchFunction) {
                 if (this[dataType].length > 0) {
-                    return;
+                    return; // If data is already loaded, return immediately
                 }
 
-                const maxRetries = 5;
+                const maxRetries = 5; // Maximum number of retries
                 let retries = 0;
-                const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+                const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms)); // Helper function for delay
 
                 while (retries < maxRetries) {
                     try {
-                        await fetchFunction.call(this);
-                        localStorage.setItem(dataType, JSON.stringify(this[dataType]));
-                        break;
+                        await fetchFunction.call(this); // Call the fetch function
+                        localStorage.setItem(dataType, JSON.stringify(this[dataType])); // Cache the fetched data
+                        break; // Break the loop if fetching is successful
                     } catch (error) {
                         if (error.response && error.response.status === 429) {
                             retries++;
-                            const waitTime = retries * 2000;
+                            const waitTime = retries * 2000; // Exponential backoff wait time
                             console.error(`Attempt ${retries} failed. Retrying in ${waitTime}ms...`);
-                            await delay(waitTime);
+                            await delay(waitTime); // Wait before retrying
                         } else {
-                            console.error(`Failed to fetch ${dataType}:`, error);
+                            console.error(`Failed to fetch ${dataType}:`, error); // Log other errors and break the loop
                             break;
                         }
                     }
                 }
             },
+            // Fetch popular characters from the API
             async fetchPopularCharacters() {
                 const response = await axios.get(`${API_URL}/characters?orderBy=-modified&limit=4&ts=${TIMESTAMP}&apikey=${API_KEY}&hash=${HASH}`);
-                this.popularCharacters = response.data.data.results;
+                this.popularCharacters = response.data.data.results; // Store the fetched popular characters
             },
+            // Fetch newest releases from the API
             async fetchNewestReleases() {
                 const response = await axios.get(`${API_URL}/comics?orderBy=-onsaleDate&limit=5&ts=${TIMESTAMP}&apikey=${API_KEY}&hash=${HASH}`);
-                this.newestReleases = response.data.data.results;
+                this.newestReleases = response.data.data.results; // Store the fetched newest releases
+                // Replace 'image_not_available' thumbnails with a default image
                 this.newestReleases.forEach(release => {
                     if (release.thumbnail.path.endsWith('image_not_available')) {
                         release.thumbnail.path = '/images/clean';
                     }
                 });
             },
+            // Check if a release is in the wishlist
             isInWishlist(release) {
-                let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-                return wishlist.some(item => item.id === release.id);
+                let wishlist = JSON.parse(localStorage.getItem('wishlist')) || []; // Get the wishlist from local storage
+                return wishlist.some(item => item.id === release.id); // Return true if the release is in the wishlist
             },
+            // Add or remove a release from the wishlist
             toggleWishlist(release) {
-                let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-                const index = wishlist.findIndex(item => item.id === release.id);
+                let wishlist = JSON.parse(localStorage.getItem('wishlist')) || []; // Get the wishlist from local storage
+                const index = wishlist.findIndex(item => item.id === release.id); // Find the index of the release in the wishlist
 
                 if (index !== -1) {
-                    wishlist.splice(index, 1);
-                    this.popupMessage = `${release.title} verwijderd uit wishlist.`;
+                    wishlist.splice(index, 1); // If the release is in the wishlist, remove it
+                    this.popupMessage = `${release.title} verwijderd uit wishlist.`; // Set popup message for removal
                 } else {
-                    wishlist.push(release);
-                    this.popupMessage = `${release.title} toegevoegd aan wishlist.`;
+                    wishlist.push(release); // If the release is not in the wishlist, add it
+                    this.popupMessage = `${release.title} toegevoegd aan wishlist.`; // Set popup message for addition
                 }
 
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                this.showPopup = true;
+                localStorage.setItem('wishlist', JSON.stringify(wishlist)); // Update the wishlist in local storage
+                this.showPopup = true; // Show the popup message
             }
         }
     };
@@ -216,9 +229,9 @@
 
     .popular-characters {
         width: 26%;
-        height: 30rem;
+        height: 29rem;
         margin-left: 34%;
-        background-color: #FDC247;
+        background-color: #fdc247;
         border-radius: 20px;
     }
 
@@ -233,12 +246,21 @@
     }
 
     .character img {
-        width: 155px;
-        height: 66%;
+        width: 145px;
+        height: 125px;
         margin-bottom: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform .3s;
     }
 
-    .character-name {
+
+    .character img:hover {
+        transform: scale(1.1);
+        transition: transform 0.3s;
+    }
+
+    .populair-character-name {
         font-size: 16px;
         font-weight: bold;
     }
@@ -404,5 +426,87 @@
         color: white;
         cursor: pointer;
         font-size: 16px;
+    }
+
+    /* Big Tablets and smartphones in landscape */
+    @media (max-width: 1024px) {
+        .main-content {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .greeting,
+        .popular-characters {
+            width: 80%;
+            margin: 10px 0;
+        }
+
+        .popular-characters {
+            margin-left: 0;
+        }
+    }
+
+    /* Smartphones */
+    @media (max-width: 768px) {
+
+        .greeting,
+        .popular-characters {
+            width: 100%;
+            height: auto;
+        }
+
+        .greeting p {
+            max-width: 100%;
+        }
+
+        .release {
+            width: 150px;
+            height: 225px;
+        }
+
+        .release img {
+            object-fit: contain;
+        }
+
+        .all-releases,
+        .all-characters {
+            width: 100%;
+        }
+
+        .release-name {
+            font-size: 14px;
+        }
+
+        .circular-heart {
+            width: 25px;
+            height: 25px;
+        }
+
+        .icon {
+            font-size: 16px;
+        }
+    }
+
+    /* Little smartphones */
+    @media (max-width: 480px) {
+
+        .intro-title,
+        .title,
+        .character-title {
+            font-size: 1.5em;
+        }
+
+        .greeting,
+        .popular-characters {
+            padding: 10px;
+        }
+
+        .wishlist-button {
+            padding: 5px 15px;
+        }
+
+        .button {
+            padding: 5px 10px;
+        }
     }
 </style>
