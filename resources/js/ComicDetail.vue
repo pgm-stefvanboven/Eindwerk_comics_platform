@@ -41,6 +41,33 @@
                 <p>Loading...</p>
             </div>
 
+            <section v-if="relatedComics.length > 0" class="related-comics-section">
+                <div class="related-head">
+                    <h3 class="small-title">Meer van: {{ comic.series.name }}</h3>
+                    <router-link v-if="relatedComics.length > 5"
+                        :to="'/series/' + comic.series.resourceURI.split('/').pop()" class="view-all-link">
+                        Bekijk alle gerelateerde comics
+                    </router-link>
+                </div>
+                <div class="comic-detail-list">
+                    <div v-for="(relatedComic, index) in relatedComics.slice(0, 5)" :key="relatedComic.id"
+                        class="comic-card">
+                        <div class="related-comics-img-container">
+                            <div class="circular-heart" @click="toggleWishlist(relatedComic)"
+                                :class="{ 'wishlist-added': isInWishlist(relatedComic) }">
+                                <i class="ri-heart-line icon"></i>
+                            </div>
+                            <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }">
+                                <img :src="`${relatedComic.thumbnail.path}.${relatedComic.thumbnail.extension}`"
+                                    :alt="relatedComic.title" />
+                            </router-link>
+                        </div>
+                        <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }" class="comic-title">{{
+                            relatedComic.title }}</router-link>
+                    </div>
+                </div>
+            </section>
+
             <section class="private-notes-section">
                 <h3 class="small-title">Private Note</h3>
                 <div v-if="privateNote && !isEditingPrivateNote">
@@ -57,35 +84,12 @@
                     class="private-note-form">
                     <textarea v-model="newPrivateNote" rows="4" cols="50"></textarea>
                     <div class="btns" v-if="newPrivateNote.trim().length > 0">
-                        <button type="submit" class="sent-btn">{{ isEditingPrivateNote ? 'Opslaan' : 'Voeg toe'
-                            }}</button>
+                        <button type="submit" class="sent-btn">
+                            {{ isEditingPrivateNote ? 'Opslaan' : 'Voeg toe' }}
+                        </button>
                         <button type="button" @click="cancelPrivateNoteEdit" class="btn">Annuleren</button>
                     </div>
                 </form>
-            </section>
-
-            <section v-if="relatedComics.length > 0" class="related-comics-section">
-                <h3 class="small-title">Meer van: {{ comic.series.name }}</h3>
-                <div class="comic-list">
-                    <div v-for="(relatedComic, index) in relatedComics.slice(0, 5)" :key="relatedComic.id"
-                        class="comic-card">
-                        <div class="img-container">
-                            <div class="circular-heart" @click="toggleWishlist(relatedComic)"
-                                :class="{ 'wishlist-added': isInWishlist(relatedComic) }">
-                                <i class="ri-heart-line icon"></i>
-                            </div>
-                            <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }">
-                                <img :src="`${relatedComic.thumbnail.path}.${relatedComic.thumbnail.extension}`"
-                                    :alt="relatedComic.title" />
-                            </router-link>
-                        </div>
-                        <router-link :to="{ name: 'comic', params: { id: relatedComic.id } }" class="comic-title">{{
-                            relatedComic.title }}</router-link>
-                    </div>
-                    <router-link v-if="relatedComics.length > 5"
-                        :to="'/series/' + comic.series.resourceURI.split('/').pop()" class="view-all-link">Bekijk alle
-                        gerelateerde comics</router-link>
-                </div>
             </section>
 
             <section class="reviews">
@@ -115,8 +119,6 @@
             <div v-if="showPopup" class="popup">
                 <p>{{ popupMessage }}</p>
             </div>
-            <!-- Einde van de popup sectie -->
-
         </div>
         <Footer />
     </div>
@@ -177,166 +179,119 @@
             }
         },
         created() {
-            console.log('Comic ID:', this.id);
-            this.fetchComicDetails();
-            this.loadReviews();
-            this.loadRandomDate();
-            this.loadPrivateNote();
+            this.fetchComic();
+            this.generateRandomDate();
         },
         methods: {
-            async fetchComicDetails() {
+            async fetchComic() {
                 try {
-                    const response = await axios.get(`https://gateway.marvel.com/v1/public/comics/${this.id}?ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`);
-                    if (response.data && response.data.data && response.data.data.results.length > 0) {
-                        this.comic = response.data.data.results[0];
-                        this.fetchRelatedComics(this.comic.series.resourceURI); // Haal gerelateerde comics op
-                    } else {
-                        this.error = 'Comic niet gevonden.';
-                    }
+                    const response = await axios.get(`https://gateway.marvel.com/v1/public/comics/${this.id}?ts=1&apikey=82f244ed9c0f202819d3fe45dd4649ac&hash=75a2dd8424de9077cb1018bee9101da5`);
+                    this.comic = response.data.data.results[0];
+                    this.fetchRelatedComics();
                 } catch (error) {
-                    console.error(error);
-                    this.error = 'Er is een fout opgetreden bij het ophalen van de comic.';
+                    this.error = error.response ? error.response.data : error.message;
+                    console.error("Failed to fetch comic:", this.error);
                 }
-            },
-            async fetchRelatedComics(seriesURI) {
-                try {
-                    const response = await axios.get(`${seriesURI}/comics?orderBy=-onsaleDate&ts=1&apikey=e8d09a0b604fd41537ada8adabcf6b4b&hash=c7a4fd72acd5f90bf5b877329faea471`);
-                    if (response.data && response.data.data && response.data.data.results.length > 0) {
-                        this.relatedComics = response.data.data.results.filter(comic => comic.id !== this.comic.id);
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            },
-            generateDescription(title) {
-                return `Dit is een beschrijving van de comic getiteld ${title}. Het is een spannende en boeiende comic die je zeker niet wilt missen!`;
             },
             generateRandomDate() {
-                const startDate = new Date(2000, 0, 1);
-                const endDate = new Date();
-                const randomTime = startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime());
-                return new Date(randomTime);
-            },
-            saveRandomDate(date) {
-                localStorage.setItem('randomDate', date);
-            },
-            loadRandomDate() {
-                let savedDate = localStorage.getItem('randomDate');
-                if (savedDate) {
-                    this.randomDate = new Date(savedDate).toLocaleDateString('nl-NL', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    });
-                } else {
-                    const newDate = this.generateRandomDate();
-                    this.randomDate = newDate.toLocaleDateString('nl-NL', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    });
-                    this.saveRandomDate(newDate);
-                }
+                const randomDate = new Date(+(new Date()) - Math.floor(Math.random() * 10000000000));
+                const dateString = randomDate.toISOString().split('T')[0];
+                this.randomDate = dateString;
             },
             generateRandomPrice() {
-                const minPrice = 2.99;
-                const maxPrice = 29.99;
-                return Math.random() * (maxPrice - minPrice) + minPrice;
+                return (Math.random() * (30 - 3 + 1) + 3).toFixed(2);
             },
             generateRandomPageCount() {
-                const minPageCount = 50;
-                const maxPageCount = 200;
-                return Math.floor(Math.random() * (maxPageCount - minPageCount + 1)) + minPageCount;
+                return Math.floor(Math.random() * (100 - 32 + 1) + 32);
+            },
+            generateDescription(title) {
+                return `No description available for ${title}`;
+            },
+            async fetchRelatedComics() {
+                try {
+                    const seriesId = this.comic.series.resourceURI.split('/').pop();
+                    const response = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics?ts=1&apikey=82f244ed9c0f202819d3fe45dd4649ac&hash=75a2dd8424de9077cb1018bee9101da5`);
+                    this.relatedComics = response.data.data.results.filter(comic => comic.id !== this.comic.id);
+                } catch (error) {
+                    this.error = error.response ? error.response.data : error.message;
+                    console.error("Failed to fetch related comics:", this.error);
+                }
             },
             toggleWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 const index = wishlist.findIndex(item => item.id === comic.id);
                 if (index !== -1) {
-                    wishlist.splice(index, 1); // Remove from wishlist
-                    this.popupMessage = 'Comic verwijderd uit je wishlist';
+                    wishlist.splice(index, 1);
+                    this.showPopupMessage(`${comic.title} is verwijderd uit je verlanglijst!`);
                 } else {
-                    wishlist.push(comic); // Add to wishlist
-                    this.popupMessage = 'Comic toegevoegd aan je wishlist';
+                    wishlist.push(comic);
+                    this.showPopupMessage(`${comic.title} is toegevoegd aan je verlanglijst!`);
                 }
                 localStorage.setItem('wishlist', JSON.stringify(wishlist));
-                this.showPopup = true;
-                setTimeout(() => {
-                    this.showPopup = false;
-                }, 3000); // Hide the popup after 3 seconds
             },
             isInWishlist(comic) {
                 const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
                 return wishlist.some(item => item.id === comic.id);
             },
-            addReview() {
-                if (this.newReview.trim().length > 0) {
-                    this.reviews.push({ text: this.newReview });
-                    localStorage.setItem('reviews', JSON.stringify(this.reviews));
-                    this.newReview = '';
-                }
-            },
-            loadReviews() {
-                const savedReviews = localStorage.getItem('reviews');
-                if (savedReviews) {
-                    this.reviews = JSON.parse(savedReviews);
-                }
-            },
             submitReview() {
-                if (this.isEditing) {
-                    if (this.editIndex !== -1) {
-                        this.reviews[this.editIndex].text = this.newReview;
-                        this.isEditing = false;
-                        this.editIndex = -1;
-                    }
+                if (this.isEditing && this.editIndex !== -1) {
+                    this.reviews.splice(this.editIndex, 1, { text: this.newReview });
+                    this.showPopupMessage('Review bijgewerkt!');
                 } else {
                     this.reviews.push({ text: this.newReview });
+                    this.showPopupMessage('Review toegevoegd!');
                 }
                 this.newReview = '';
+                this.isEditing = false;
+                this.editIndex = -1;
                 localStorage.setItem('reviews', JSON.stringify(this.reviews));
-            },
-            editReview(index) {
-                this.isEditing = true;
-                this.editIndex = index;
-                this.newReview = this.reviews[index].text;
             },
             deleteReview(index) {
                 this.reviews.splice(index, 1);
+                this.showPopupMessage('Review verwijderd!');
                 localStorage.setItem('reviews', JSON.stringify(this.reviews));
+            },
+            editReview(index) {
+                this.newReview = this.reviews[index].text;
+                this.isEditing = true;
+                this.editIndex = index;
             },
             cancelEdit() {
                 this.isEditing = false;
-                this.editIndex = -1;
                 this.newReview = '';
+                this.editIndex = -1;
             },
-            loadPrivateNote() {
-                const savedNote = localStorage.getItem('privateNote');
-                if (savedNote) {
-                    this.privateNote = savedNote;
-                }
+            showPopupMessage(message) {
+                this.popupMessage = message;
+                this.showPopup = true;
+                setTimeout(() => {
+                    this.showPopup = false;
+                }, 3000);
             },
             submitPrivateNote() {
                 this.privateNote = this.newPrivateNote;
-                localStorage.setItem('privateNote', this.privateNote);
+                this.showPopupMessage('Notitie toegevoegd!');
                 this.newPrivateNote = '';
                 this.isEditingPrivateNote = false;
+                localStorage.setItem('privateNote', this.privateNote);
             },
             editPrivateNote() {
                 this.newPrivateNote = this.privateNote;
                 this.isEditingPrivateNote = true;
             },
             deletePrivateNote() {
-                localStorage.removeItem('privateNote');
                 this.privateNote = '';
-                this.newPrivateNote = '';
-                this.isEditingPrivateNote = false;
+                this.showPopupMessage('Notitie verwijderd!');
+                localStorage.removeItem('privateNote');
             },
             cancelPrivateNoteEdit() {
-                this.isEditingPrivateNote = false;
                 this.newPrivateNote = '';
+                this.isEditingPrivateNote = false;
             }
         }
     };
 </script>
+
 
 <style scoped>
     .container {
@@ -522,6 +477,84 @@
         cursor: pointer;
         font-size: 16px;
         margin-left: 20px;
+    }
+
+    .related-comics-section {
+        margin: 40px 0;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+    }
+
+    .related-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .comic-detail-list {
+        display: flex;
+        gap: 20px;
+        justify-content: left;
+        flex-wrap: wrap;
+    }
+
+    .comic-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 10px;
+        padding: 10px;
+        transition: transform 0.3s;
+    }
+
+    .comic-card:hover {
+        transform: scale(1.05);
+    }
+
+    .related-comics-img-container {
+        position: relative;
+        width: 150px;
+        height: 225px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    .related-comics-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .related-comics-img-container:hover img {
+        transform: scale(1.1);
+    }
+
+    .comic-title {
+        font-size: 1em;
+        text-align: center;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .view-all-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 1em;
+        font-weight: bold;
+        color: #f9f9f9;
+        background-color: #CA8A04;
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .view-all-link:hover {
+        background-color: #E0A800;
     }
 
     .comic-title {
