@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TopicController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Topic routes:
+Route::get('/topics', [TopicController::class, 'index']);
+Route::post('/topics', [TopicController::class, 'store']);
+Route::put('/topics/{id}', [TopicController::class, 'update']);
+Route::delete('/topics/{id}', [TopicController::class, 'destroy']);
+
+// Reply routes:
+Route::post('/topics/{id}/replies', [TopicController::class, 'addReply']);

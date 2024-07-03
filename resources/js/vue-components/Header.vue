@@ -10,6 +10,7 @@
           <li><router-link to="/comics" class="nav-item text">Comics</router-link></li>
           <li><router-link to="/characters" class="nav-item text">Characters</router-link></li>
           <li><router-link to="/wishlist" class="nav-item text">Wishlist</router-link></li>
+          <li><router-link to="/community" class="nav-item text">Community</router-link></li>
         </ul>
       </nav>
       <div v-if="searchResults.length > 0" class="search-results">
