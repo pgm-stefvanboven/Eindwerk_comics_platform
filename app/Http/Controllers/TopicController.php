@@ -8,7 +8,7 @@ class TopicController extends Controller
 {
     public function index()
     {
-        return Topic::all();
+        return Topic::with('replies')->get();
     }
 
     public function store(Request $request)
@@ -45,5 +45,5 @@ class TopicController extends Controller
     }
 
     //add replys code:
-
 }
+;

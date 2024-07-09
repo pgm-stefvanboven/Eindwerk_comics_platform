@@ -28,7 +28,7 @@
                         <div>
                             <strong>{{ topic.title }}</strong>
                             <p>{{ topic.content }}</p>
-                            <small>{{ formatDate(topic.createdAt) }}</small>
+                            <small>{{ formatDate(topic.created_at) }}</small>
                         </div>
                         <div class="buttons">
                             <button @click="editTopic(topic)" class="btn btn-secondary">Edit</button>
@@ -39,7 +39,7 @@
                             <ul>
                                 <li v-for="reply in topic.replies" :key="reply.id">
                                     <p>{{ reply.content }}</p>
-                                    <small>{{ formatDate(reply.createdAt) }}</small>
+                                    <small>{{ formatDate(reply.created_at) }}</small>
                                 </li>
                             </ul>
                             <form @submit.prevent="addReply(topic.id)">

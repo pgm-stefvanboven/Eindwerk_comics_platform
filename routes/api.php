@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\ReplyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,4 +27,6 @@ Route::put('/topics/{id}', [TopicController::class, 'update']);
 Route::delete('/topics/{id}', [TopicController::class, 'destroy']);
 
 // Reply routes:
-Route::post('/topics/{id}/replies', [TopicController::class, 'addReply']);
+Route::get('/topics/{topicId}/replies', [ReplyController::class, 'index']);
+Route::post('/topics/{topicId}/replies', [ReplyController::class, 'store']);
+Route::delete('/replies/{id}', [ReplyController::class, 'destroy']);
