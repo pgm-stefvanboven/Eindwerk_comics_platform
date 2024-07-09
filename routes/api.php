@@ -29,4 +29,5 @@ Route::delete('/topics/{id}', [TopicController::class, 'destroy']);
 // Reply routes:
 Route::get('/topics/{topicId}/replies', [ReplyController::class, 'index']);
 Route::post('/topics/{topicId}/replies', [ReplyController::class, 'store']);
+Route::put('/replies/{id}', [ReplyController::class, 'update']);
 Route::delete('/replies/{id}', [ReplyController::class, 'destroy']);

@@ -29,6 +29,19 @@ class ReplyController extends Controller
         return response()->json($reply, 201);
     }
 
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required',
+        ]);
+
+        $reply = Reply::findOrFail($id);
+        $reply->content = $request->content;
+        $reply->save();
+
+        return response()->json($reply, 200);
+    }
+
     public function destroy($id)
     {
         $reply = Reply::findOrFail($id);

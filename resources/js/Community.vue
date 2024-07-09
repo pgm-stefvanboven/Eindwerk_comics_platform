@@ -31,8 +31,12 @@
                             <small>{{ formatDate(topic.created_at) }}</small>
                         </div>
                         <div class="buttons">
-                            <button @click="editTopic(topic)" class="btn btn-secondary">Edit</button>
-                            <button @click="deleteTopic(topic.id)" class="btn btn-danger">Delete</button>
+                            <button @click="editTopic(topic)" class="btn btn-secondary editicon">
+                                <img src="images/edit.svg" alt="edit_icon">
+                            </button>
+                            <button @click="deleteTopic(topic.id)" class="btn btn-danger deleteicon">
+                                <img src="images/delete.svg" alt="delete_icon">
+                            </button>
                         </div>
                         <div v-if="topic.id === viewingRepliesFor" class="replies-container">
                             <h3>Replies</h3>
@@ -40,6 +44,14 @@
                                 <li v-for="reply in topic.replies" :key="reply.id">
                                     <p>{{ reply.content }}</p>
                                     <small>{{ formatDate(reply.created_at) }}</small>
+                                    <div class="buttons">
+                                        <button @click="editReply(reply)" class="btn btn-secondary editicon">
+                                            <img src="images/edit.svg" alt="edit_icon">
+                                        </button>
+                                        <button @click="deleteReply(reply.id)" class="btn btn-danger deleteicon">
+                                            <img src="images/delete.svg" alt="delete_icon">
+                                        </button>
+                                    </div>
                                 </li>
                             </ul>
                             <form @submit.prevent="addReply(topic.id)">
@@ -47,7 +59,9 @@
                                     <label for="replyContent">Your Reply:</label>
                                     <textarea id="replyContent" v-model="newReply" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Add Reply</button>
+                                <button type="submit" class="btn btn-primary addicon">
+                                    <img src="images/add-large-line.svg" alt="add_icon"> Add Reply
+                                </button>
                             </form>
                         </div>
                         <button @click="viewReplies(topic.id)" class="btn btn-info">View Replies</button>
@@ -68,6 +82,19 @@
                         <button @click="cancelEdit" class="btn btn-secondary">Cancel</button>
                     </form>
                 </div>
+
+                <div v-if="editingReply" class="edit-container">
+                    <h2>Edit Reply</h2>
+                    <form @submit.prevent="updateReply">
+                        <div class="form-group">
+                            <label for="editReplyContent">Content:</label>
+                            <textarea id="editReplyContent" v-model="editingReply.content" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Reply</button>
+                        <button @click="cancelEditReply" class="btn btn-secondary">Cancel</button>
+                    </form>
+                </div>
+
             </div>
         </div>
         <Footer />
@@ -93,6 +120,7 @@
                 },
                 newReply: '',
                 editingTopic: null,
+                editingReply: null,
                 viewingRepliesFor: null,
                 showNewTopicForm: false,
                 error: ''
@@ -172,6 +200,39 @@
                 } catch (error) {
                     this.error = 'Failed to add reply.';
                 }
+            },
+
+            async updateReply() {
+                try {
+                    const response = await axios.put(`/api/replies/${this.editingReply.id}`, this.editingReply);
+                    const topic = this.topics.find(t => t.id === response.data.topic_id);
+                    if (topic) {
+                        const index = topic.replies.findIndex(reply => reply.id === response.data.id);
+                        topic.replies.splice(index, 1, response.data);
+                    }
+                    this.editingReply = null;
+                    this.error = '';
+                } catch (error) {
+                    this.error = 'Failed to update reply.';
+                }
+            },
+
+            async deleteReply(id) {
+                try {
+                    await axios.delete(`/api/replies/${id}`);
+                    this.topics.forEach(topic => {
+                        topic.replies = topic.replies.filter(reply => reply.id !== id);
+                    });
+                    this.error = '';
+                } catch (error) {
+                    this.error = 'Failed to delete reply.';
+                }
+            },
+            editReply(reply) {
+                this.editingReply = { ...reply };
+            },
+            cancelEditReply() {
+                this.editingReply = null;
             }
         }
     };
@@ -179,35 +240,35 @@
 
 <style scoped>
     .container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 25px;
         text-align: center;
-        background-color: #f9f9f9;
+        background-color: #fdfdfd;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
-        font-size: 36px;
-        margin-bottom: 20px;
-        color: #333;
+        font-size: 40px;
+        margin-bottom: 25px;
+        color: #222;
     }
 
     h2 {
-        font-size: 24px;
+        font-size: 28px;
         margin-bottom: 20px;
-        color: #333;
+        color: #222;
     }
 
     p {
-        font-size: 18px;
+        font-size: 20px;
         margin-bottom: 30px;
-        color: #666;
+        color: #555;
     }
 
     .form-container {
-        margin-bottom: 40px;
+        margin-bottom: 50px;
         background-color: #fff;
         padding: 20px;
         border-radius: 10px;
@@ -215,7 +276,7 @@
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
 
     label {
@@ -228,7 +289,7 @@
     input[type="text"],
     textarea {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
         border: 1px solid #ccc;
         border-radius: 5px;
         font-size: 16px;
@@ -250,21 +311,34 @@
     .btn-primary {
         background-color: #007bff;
         color: white;
+        transition: background-color 0.3s;
     }
 
     .btn-secondary {
         background-color: #6c757d;
         color: white;
+        transition: background-color 0.3s;
     }
 
     .btn-danger {
         background-color: #dc3545;
         color: white;
+        transition: background-color 0.3s;
+    }
+
+    .editicon,
+    .deleteicon,
+    .addicon {
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+        border-radius: 5px;
     }
 
     .btn-info {
         background-color: #17a2b8;
         color: white;
+        transition: background-color 0.3s;
     }
 
     .btn-primary:hover {
@@ -285,7 +359,7 @@
 
     .topics-container {
         text-align: left;
-        margin-top: 20px;
+        margin-top: 30px;
     }
 
     ul {
@@ -294,10 +368,10 @@
     }
 
     .topic-item {
-        margin-bottom: 10px;
-        padding: 15px;
+        margin-bottom: 20px;
+        padding: 20px;
         background-color: #fff;
-        border: 1px solid #ccc;
+        border: 1px solid #ddd;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -307,13 +381,13 @@
     }
 
     .topic-item strong {
-        font-size: 18px;
+        font-size: 20px;
         color: #333;
     }
 
     .topic-item p {
-        font-size: 16px;
-        color: #666;
+        font-size: 18px;
+        color: #555;
     }
 
     .buttons {
@@ -336,6 +410,10 @@
 
     .replies-container {
         margin-top: 10px;
+        padding: 10px;
+        background-color: #fafafa;
+        border: 1px solid #ddd;
+        border-radius: 10px;
     }
 
     .replies-container ul {
@@ -345,8 +423,8 @@
 
     .replies-container li {
         background-color: #f1f1f1;
-        padding: 10px;
+        padding: 15px;
         border-radius: 5px;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
     }
 </style>
