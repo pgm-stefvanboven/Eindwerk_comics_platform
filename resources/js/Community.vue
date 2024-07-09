@@ -5,7 +5,10 @@
             <h1>Community</h1>
             <p>Welcome to the community page! Here you can interact with other users, share your thoughts, and discuss
                 your favorite Marvel comics and characters.</p>
-            <button @click="toggleNewTopicForm" class="btn btn-primary">Create New Topic</button>
+            <button @click="toggleNewTopicForm" class="btn btn-primary addicon">
+                <img src="images/add-large-line.svg" alt="add_icon">
+                Create New Topic
+            </button>
             <div v-if="showNewTopicForm" class="form-container">
                 <h2>Create a New Topic</h2>
                 <form @submit.prevent="createTopic">
@@ -38,8 +41,8 @@
                                 <img src="images/delete.svg" alt="delete_icon">
                             </button>
                         </div>
-                        <div v-if="topic.id === viewingRepliesFor" class="replies-container">
-                            <h3>Replies</h3>
+                        <div class="replies-container">
+                            <h3>Replies:</h3>
                             <ul>
                                 <li v-for="reply in topic.replies" :key="reply.id">
                                     <p>{{ reply.content }}</p>
@@ -54,17 +57,17 @@
                                     </div>
                                 </li>
                             </ul>
-                            <form @submit.prevent="addReply(topic.id)">
+                            <button @click="toggleReplyForm(topic.id)" class="btn btn-primary addicon">
+                                <img src="images/add-large-line.svg" alt="add_icon"> Add Reply
+                            </button>
+                            <form v-if="showReplyForm === topic.id" @submit.prevent="addReply(topic.id)">
                                 <div class="form-group">
                                     <label for="replyContent">Your Reply:</label>
                                     <textarea id="replyContent" v-model="newReply" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary addicon">
-                                    <img src="images/add-large-line.svg" alt="add_icon"> Add Reply
-                                </button>
+                                <button type="submit" class="btn btn-primary">Submit Reply</button>
                             </form>
                         </div>
-                        <button @click="viewReplies(topic.id)" class="btn btn-info">View Replies</button>
                     </li>
                 </ul>
                 <div v-if="editingTopic" class="edit-container">
@@ -121,8 +124,8 @@
                 newReply: '',
                 editingTopic: null,
                 editingReply: null,
-                viewingRepliesFor: null,
                 showNewTopicForm: false,
+                showReplyForm: null,
                 error: ''
             };
         },
@@ -132,6 +135,9 @@
         methods: {
             toggleNewTopicForm() {
                 this.showNewTopicForm = !this.showNewTopicForm;
+            },
+            toggleReplyForm(topicId) {
+                this.showReplyForm = this.showReplyForm === topicId ? null : topicId;
             },
             async fetchTopics() {
                 try {
@@ -182,13 +188,6 @@
             formatDate(datetime) {
                 return new Date(datetime).toLocaleString();
             },
-            viewReplies(topicId) {
-                if (this.viewingRepliesFor === topicId) {
-                    this.viewingRepliesFor = null;
-                } else {
-                    this.viewingRepliesFor = topicId;
-                }
-            },
             async addReply(topicId) {
                 try {
                     const response = await axios.post(`/api/topics/${topicId}/replies`, { content: this.newReply });
@@ -197,6 +196,7 @@
                         topic.replies.push(response.data);
                     }
                     this.newReply = '';
+                    this.showReplyForm = null;
                 } catch (error) {
                     this.error = 'Failed to add reply.';
                 }
@@ -268,120 +268,54 @@
     }
 
     .form-container {
-        margin-bottom: 50px;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
     }
 
     .form-group {
         margin-bottom: 15px;
+        text-align: left;
     }
 
-    label {
+    .form-group label {
         display: block;
-        font-weight: bold;
         margin-bottom: 5px;
-        color: #333;
+        font-weight: bold;
     }
 
-    input[type="text"],
-    textarea {
+    .form-group input,
+    .form-group textarea {
         width: 100%;
-        padding: 12px;
+        padding: 10px;
+        font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 5px;
-        font-size: 16px;
-        color: #333;
     }
 
-    textarea {
-        resize: vertical;
-    }
-
-    button {
-        padding: 10px 20px;
+    .btn {
         font-size: 16px;
-        border: none;
-        border-radius: 5px;
+        padding: 10px 10px;
         cursor: pointer;
     }
 
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
-        transition: background-color 0.3s;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        transition: background-color 0.3s;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        color: white;
-        transition: background-color 0.3s;
-    }
-
-    .editicon,
-    .deleteicon,
-    .addicon {
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        border-radius: 5px;
-    }
-
-    .btn-info {
-        background-color: #17a2b8;
-        color: white;
-        transition: background-color 0.3s;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-
-    .btn-info:hover {
-        background-color: #117a8b;
-    }
-
     .topics-container {
-        text-align: left;
         margin-top: 30px;
     }
 
-    ul {
+    .topics-container ul {
         list-style: none;
         padding: 0;
     }
 
     .topic-item {
-        margin-bottom: 20px;
+        margin-bottom: 30px;
         padding: 20px;
-        background-color: #fff;
-        border: 1px solid #ddd;
+        background-color: #f5f5f5;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .topic-item div {
-        margin-bottom: 10px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     }
 
     .topic-item strong {
-        font-size: 20px;
+        font-size: 22px;
         color: #333;
     }
 
@@ -390,17 +324,50 @@
         color: #555;
     }
 
-    .buttons {
-        display: flex;
-        gap: 10px;
+    .topic-item small {
+        font-size: 14px;
+        color: #999;
+    }
+
+    .replies-container {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    .replies-container h3 {
+        font-size: 20px;
+        color: #222;
+        margin-bottom: 10px;
+    }
+
+    .replies-container ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .replies-container ul li {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #eaeaea;
+        border-radius: 5px;
+    }
+
+    .replies-container ul li p {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .replies-container ul li small {
+        font-size: 12px;
+        color: #777;
     }
 
     .edit-container {
-        margin-top: 40px;
-        background-color: #fff;
+        margin-top: 30px;
         padding: 20px;
+        background-color: #f5f5f5;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     }
 
     .error {
@@ -408,23 +375,20 @@
         margin-top: 10px;
     }
 
-    .replies-container {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #fafafa;
-        border: 1px solid #ddd;
-        border-radius: 10px;
+    .editicon img,
+    .deleteicon img,
+    .addicon img {
+        width: 20px;
+        height: 20px;
     }
 
-    .replies-container ul {
-        padding: 0;
-        list-style: none;
+    .addicon {
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
-    .replies-container li {
-        background-color: #f1f1f1;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 10px;
+    .form-group textarea {
+        resize: none;
     }
 </style>
