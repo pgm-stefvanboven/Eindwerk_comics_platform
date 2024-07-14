@@ -6,6 +6,8 @@ import CharactersPage from "./Characters.vue";
 import CharacterDetail from "./CharacterDetail.vue";
 import WishlistPage from "./Wishlist.vue";
 import CommunityPage from "./Community.vue";
+import CollectionPage from "./Collection.vue";
+import SwapRequestPage from "./SwapRequest.vue";
 
 const routes = [
     {
@@ -44,6 +46,16 @@ const routes = [
         name: "CommunityPage",
         path: "/community",
         component: CommunityPage,
+    },
+    {
+        name: "CollectionPage",
+        path: "/collection",
+        component: CollectionPage,
+    },
+    {
+        name: "SwapRequestPage",
+        path: "/swap-request",
+        component: SwapRequestPage,
     },
 ];
 

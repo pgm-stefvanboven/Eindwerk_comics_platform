@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\SwapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +33,14 @@ Route::get('/topics/{topicId}/replies', [ReplyController::class, 'index']);
 Route::post('/topics/{topicId}/replies', [ReplyController::class, 'store']);
 Route::put('/replies/{id}', [ReplyController::class, 'update']);
 Route::delete('/replies/{id}', [ReplyController::class, 'destroy']);
+
+// Collection routes:
+Route::get('/collections', [CollectionController::class, 'index']);
+Route::post('/collections', [CollectionController::class, 'store']);
+Route::patch('/collections/{id}/rating', [CollectionController::class, 'updateRating']);
+
+// Swap routes:
+Route::post('/swaps', [SwapController::class, 'store']);
+Route::get('/swaps', [SwapController::class, 'index']);
+Route::post('/swaps/{swap}/accept', [SwapController::class, 'accept']);
+Route::post('/swaps/{swap}/reject', [SwapController::class, 'reject']);

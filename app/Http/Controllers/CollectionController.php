@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Comic;
+
+class CollectionController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Comic::query();
+
+        if ($request->has('search')) {
+            $query->where('title', 'LIKE', "%{$request->search}%")
+                ->orWhere('publisher', 'LIKE', "%{$request->search}%")
+                ->orWhere('description', 'LIKE', "%{$request->search}%");
+        }
+
+        $comics = $query->paginate(10);
+        return response()->json($comics);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'title' => 'required|string|max:255',
+            'publisher' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+
+        // Handle file upload
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
+            $path = $file->store('images', 'public'); // Store the file in the 'public/images' directory
+            $validated['thumbnail'] = $path; // Save the file path in the database
+        }
+
+        $comic = Comic::create($validated);
+
+        return response()->json($comic);
+    }
+
+    public function updateRating(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'rating' => 'required|numeric|min:1|max:5',
+        ]);
+
+        $comic = Comic::findOrFail($id);
+        $newRatingCount = $comic->rating_count + 1;
+        $newRating = (($comic->rating * $comic->rating_count) + $validated['rating']) / $newRatingCount;
+
+        $comic->rating = $newRating;
+        $comic->rating_count = $newRatingCount;
+        $comic->save();
+
+        return response()->json($comic);
+    }
+}
