@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comic;
+use Illuminate\Support\Facades\Log;
 
 class CollectionController extends Controller
 {
@@ -23,23 +24,28 @@ class CollectionController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'title' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
-            'description' => 'required|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'title' => 'required|string|max:255',
+                'publisher' => 'required|string|max:255',
+                'description' => 'required|string',
+            ]);
 
-        // Handle file upload
-        if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            $path = $file->store('images', 'public'); // Store the file in the 'public/images' directory
-            $validated['thumbnail'] = $path; // Save the file path in the database
+            // Handle file upload
+            if ($request->hasFile('thumbnail')) {
+                $file = $request->file('thumbnail');
+                $path = $file->store('images', 'public'); // Store the file in the 'public/images' directory
+                $validated['thumbnail'] = $path; // Save the file path in the database
+            }
+
+            $comic = Comic::create($validated);
+
+            return response()->json($comic);
+        } catch (\Exception $e) {
+            Log::error('Error adding comic: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
         }
-
-        $comic = Comic::create($validated);
-
-        return response()->json($comic);
     }
 
     public function updateRating(Request $request, $id)

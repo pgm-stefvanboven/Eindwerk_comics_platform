@@ -7,15 +7,28 @@
                     <div class="col-md-12">
                         <h1>Collection</h1>
                         <p class="collection-intro-text">
-                            Welcome to your personal collection page! Here you can add your favorite comics, rate them,
-                            swap them with others, and search for specific comics. Enjoy! 🦸‍♂ make your collection
-                            complete!️
+                            Welcome to the collection page! Here you can add your comics you want to trade, rate them
+                            and search for specific comics. Enjoy it! 🦸‍♂ complete your collection!️
                         </p>
                         <button @click="showForm = !showForm" class="btn btn-secondary">
                             {{ showForm ? 'Hide Form' : 'Add Comic' }}
                         </button>
                         <form v-if="showForm" @submit.prevent="addComic" class="add-comic-form">
                             <!-- Form fields here -->
+                            <div class="form-group">
+                                <label for="title">Title</label>
+                                <input type="text" v-model="newComic.title" class="form-control" id="title" required>
+                                <label for="description">Description</label>
+                                <textarea v-model="newComic.description" class="form-control" id="description"
+                                    required></textarea>
+                                <label for="publisher">Publisher</label>
+                                <input type="text" v-model="newComic.publisher" class="form-control" id="publisher"
+                                    required>
+                                <label for="thumbnail">Thumbnail</label>
+                                <input type="file" @change="handleFileUpload" class="form-control" id="thumbnail"
+                                    required>
+                                <button type="submit" class="btn btn-primary newcomic">Add Comic</button>
+                            </div>
                         </form>
                         <input type="text" v-model="searchQuery" @input="fetchCollections"
                             placeholder="Search comics...">
@@ -324,6 +337,7 @@
         display: flex;
         justify-content: center;
         margin-top: 20px;
+        margin-bottom: 138px;
     }
 
     .collection .pagination button {
@@ -349,5 +363,47 @@
         margin: 0 10px;
         color: #333;
         font-size: 1rem;
+    }
+
+    .collection .pagination input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 50px;
+        text-align: center;
+    }
+
+    .collection .pagination input:focus {
+        outline: none;
+    }
+
+    .collection .btn-info {
+        background-color: #17a2b8;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .collection .btn-info:hover {
+        background-color: #138496;
+    }
+
+    .collection .swap-requests-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .newcomic {
+        margin-top: 10px;
     }
 </style>
