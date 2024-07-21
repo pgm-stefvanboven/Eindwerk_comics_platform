@@ -8,6 +8,8 @@ import WishlistPage from "./Wishlist.vue";
 import CommunityPage from "./Community.vue";
 import CollectionPage from "./Collection.vue";
 import SwapRequestPage from "./SwapRequest.vue";
+import ListingListPage from "./ListingList.vue";
+import ListingDetailPage from "./ListingDetails.vue";
 
 const routes = [
     {
@@ -56,6 +58,17 @@ const routes = [
         name: "SwapRequestPage",
         path: "/swap-request",
         component: SwapRequestPage,
+    },
+    {
+        path: "/listings",
+        name: "ListingList",
+        component: ListingListPage,
+    },
+    {
+        path: "/listing/:id",
+        name: "ListingDetails",
+        component: ListingDetailPage,
+        props: true,
     },
 ];
 

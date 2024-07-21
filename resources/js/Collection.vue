@@ -159,7 +159,7 @@
                     });
             },
             requestSwap(comic) {
-                // Vraag de gebruiker om de comic ID in te voeren die ze willen aanbieden in ruil
+                // Ask the user to enter the comic ID they want to offer in return
                 const selectedComicId = prompt('Enter the ID of the comic you want to offer in exchange:');
 
                 axios.post('/api/swaps', {
@@ -385,6 +385,7 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        margin-top: 10px;
     }
 
     .collection .btn-info:hover {
