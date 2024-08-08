@@ -11,14 +11,16 @@ class SwapController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $validated = $request->validate([
                 'comic_id' => 'required|exists:comics,id',
                 'requested_comic_id' => 'required|exists:comics,id'
             ]);
 
+            Log::info('Validation passed: ', $validated);
+
             $swap = Swap::create([
-                'comic_id' => $request->comic_id,
-                'requested_comic_id' => $request->requested_comic_id,
+                'comic_id' => $validated['comic_id'],
+                'requested_comic_id' => $validated['requested_comic_id'],
                 'status' => 'pending'
             ]);
 

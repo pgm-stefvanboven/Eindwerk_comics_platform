@@ -1,12 +1,12 @@
 <template>
     <div class="chat-container">
         <div class="chat-header">
-            <h2>Chat with {{ poster }}</h2>
-            <button @click="$emit('close')">X</button>
+            <h2>Je chat met: {{ poster }}</h2>
+            <button @click="closeChat">X</button>
         </div>
         <div class="chat-messages">
             <ul>
-                <li v-for="chat in chats" :key="chat.id">
+                <li v-for="chat in chats" :key="chat.id" :class="{'user-message': chat.poster === 'You'}">
                     <strong>{{ chat.poster }}:</strong> {{ chat.message }}
                 </li>
             </ul>
@@ -22,7 +22,7 @@
     import axios from 'axios';
 
     export default {
-        props: ['poster'],
+        props: ['poster', 'listings'],
         data() {
             return {
                 message: '',
@@ -31,47 +31,89 @@
         },
         mounted() {
             this.fetchMessages();
-            setInterval(this.fetchMessages, 5000); // Haal elke 5 seconden nieuwe berichten op
+        },
+        watch: {
+            poster(newPoster, oldPoster) {
+                if (newPoster !== oldPoster) {
+                    this.fetchMessages();
+                }
+            }
         },
         methods: {
             fetchMessages() {
-                axios.get('/api/chats').then(response => {
+                axios.get(`/api/chats/poster/${this.poster}`).then(response => {
+                    console.log('Fetched messages:', response.data);
                     this.chats = response.data;
+                }).catch(error => {
+                    console.error('Error fetching messages:', error);
                 });
             },
             sendMessage() {
                 if (this.message.trim() === '') return;
+
                 const newMessage = { poster: 'You', message: this.message };
-                axios.post('/api/chats', newMessage).then(response => {
-                    this.message = '';
-                    this.fetchMessages();
-                    this.generateReply();
-                });
-            },
-            generateReply() {
-                setTimeout(() => {
-                    const replyMessage = { poster: this.poster, message: this.getRandomReply() };
-                    axios.post('/api/chats', replyMessage).then(response => {
-                        this.fetchMessages();
+                axios.post('/api/chats', newMessage)
+                    .then(response => {
+                        this.chats.push(response.data);
+                        this.generateReply(this.message);
+                        this.message = '';
+                    })
+                    .catch(error => {
+                        console.error('Error sending message:', error);
                     });
-                }, 2000); // Simuleer een vertraging van 2 seconden voor de gegenereerde reactie
             },
-            getRandomReply() {
-                const replies = [
-                    "Dank je voor je interesse in mijn strip!",
-                    "De prijs is €{{ listing.price }}. Is dat oké voor jou?",
-                    "De strip is nog beschikbaar. Wil je hem kopen?",
-                    "Ik kan je meer foto's sturen als je wilt.",
-                    "De strip is in goede staat.",
-                    "Wanneer wil je de strip ophalen?",
-                    "We kunnen ook verzenden als dat makkelijker is voor je.",
-                    "Hoe wil je betalen? Contant of via overschrijving?",
-                    "Laat me weten als je nog vragen hebt.",
-                    "Bedankt! Ik kan de strip voor je reserveren."
-                ];
-                return replies[Math.floor(Math.random() * replies.length)];
+            generateReply(userMessage) {
+                setTimeout(() => {
+                    const replyMessage = {
+                        poster: this.poster,
+                        message: this.getDynamicReply(userMessage)
+                    };
+                    axios.post('/api/chats', replyMessage).then(response => {
+                        console.log('Reply message:', response.data);
+                        this.chats.push(response.data);
+                    });
+                }, 2000);
+            },
+            getDynamicReply(userMessage) {
+                const lowerCaseMessage = userMessage.toLowerCase();
+
+                if (lowerCaseMessage.includes("reserveren")) {
+                    return "Bedankt! Ik kan de strip voor je reserveren.";
+                }
+                if (lowerCaseMessage.includes("prijs")) {
+                    return `De prijs is €${this.getListingPrice()}. Is dat oké voor jou?`;
+                }
+                if (lowerCaseMessage.includes("beschikbaar")) {
+                    return "De strip is nog beschikbaar. Wil je hem kopen?";
+                }
+                if (lowerCaseMessage.includes("foto's") || lowerCaseMessage.includes("foto's sturen")) {
+                    return "Ik kan je meer foto's sturen als je wilt.";
+                }
+                if (lowerCaseMessage.includes("staat")) {
+                    return "De strip is in goede staat.";
+                }
+                if (lowerCaseMessage.includes("ophalen")) {
+                    return "Wanneer wil je de strip ophalen?";
+                }
+                if (lowerCaseMessage.includes("verzenden")) {
+                    return "We kunnen ook verzenden als dat makkelijker is voor je.";
+                }
+                if (lowerCaseMessage.includes("betalen")) {
+                    return "Hoe wil je betalen? Contant of via overschrijving?";
+                }
+                if (lowerCaseMessage.includes("vragen")) {
+                    return "Laat me weten als je nog vragen hebt.";
+                }
+                return "Dank je voor je interesse in mijn strip!";
+            },
+            getListingPrice() {
+                const listing = this.listings.find(listing => listing.poster === this.poster);
+                return listing ? listing.price : 'onbekend';
+            },
+            closeChat() {
+                this.$emit('close');
             }
-        }
+        },
     };
 </script>
 
@@ -124,6 +166,18 @@
         padding: 0.5em;
         background: white;
         border-radius: 5px;
+    }
+
+    .chat-messages li.user-message {
+        background: #e0f7fa;
+    }
+
+    .chat-messages li button {
+        margin-left: 1em;
+        background: none;
+        border: none;
+        color: #007BFF;
+        cursor: pointer;
     }
 
     .chat-input {

@@ -57,3 +57,7 @@ Route::resource('reviews', ReviewController::class);
 // Chat routes:
 Route::get('/chats', [ChatController::class, 'index']);
 Route::post('/chats', [ChatController::class, 'store']);
+Route::get('/chats/{id}', [ChatController::class, 'show']);
+Route::put('/chats/{id}', [ChatController::class, 'update']);
+Route::delete('/chats/{id}', [ChatController::class, 'destroy']);
+Route::get('/chats/poster/{poster}', [ChatController::class, 'getChatByPoster']);
