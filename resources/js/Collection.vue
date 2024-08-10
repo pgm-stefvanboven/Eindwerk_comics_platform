@@ -5,31 +5,53 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <h1>Collection</h1>
+                        <h1>Store</h1>
                         <p class="collection-intro-text">
-                            Welcome to the collection page! Here you can add your comics you want to trade, rate them
+                            Welcome to the store page! Here you can add your comics you want to trade or sell, rate them
                             and search for specific comics. Enjoy it! 🦸‍♂ complete your collection!️
                         </p>
                         <button @click="showForm = !showForm" class="btn btn-secondary">
                             {{ showForm ? 'Hide Form' : 'Add Comic' }}
                         </button>
                         <form v-if="showForm" @submit.prevent="addComic" class="add-comic-form">
-                            <!-- Form fields here -->
+                            <div class="form-group">
+                                <label for="poster">Poster</label>
+                                <input v-model="newComic.poster" placeholder="Poster" class="form-control" required>
+                            </div>
                             <div class="form-group">
                                 <label for="title">Title</label>
                                 <input type="text" v-model="newComic.title" class="form-control" id="title" required>
+                            </div>
+                            <div class="form-group">
                                 <label for="description">Description</label>
                                 <textarea v-model="newComic.description" class="form-control" id="description"
                                     required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Price</label>
+                                <input v-model="newComic.price" type="number" placeholder="Price" class="form-control"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="type">Type</label>
+                                <select v-model="newComic.type" class="form-control" required>
+                                    <option value="sale">For Sale</option>
+                                    <option value="rent">For Rent</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="publisher">Publisher</label>
                                 <input type="text" v-model="newComic.publisher" class="form-control" id="publisher"
                                     required>
+                            </div>
+                            <div class="form-group">
                                 <label for="thumbnail">Thumbnail</label>
                                 <input type="file" @change="handleFileUpload" class="form-control" id="thumbnail"
                                     required>
-                                <button type="submit" class="btn btn-primary newcomic">Add Comic</button>
                             </div>
+                            <button type="submit" class="btn btn-primary newcomic">Add Comic</button>
                         </form>
+
                         <input type="text" v-model="searchQuery" @input="fetchCollections"
                             placeholder="Search comics...">
                         <div v-if="collections.length" class="comic-grid">
@@ -38,9 +60,14 @@
                                     class="comic-thumbnail">
                                 <div class="comic-info">
                                     <h3>{{ comic.title }}</h3>
-                                    <p><strong>ID:</strong> {{ comic.id }}</p>
-                                    <p><strong>Publisher:</strong> {{ comic.publisher }}</p>
-                                    <p>{{ comic.description }}</p>
+                                    <div class="comic-import-info">
+                                        <p><strong>ID:</strong> {{ comic.id }}</p>
+                                        <p><strong>Publisher:</strong> {{ comic.publisher }}</p>
+                                        <p>{{ comic.description }}</p>
+                                        <p><strong>Price:</strong> {{ comic.price }}</p>
+                                        <p><strong>Type:</strong> {{ comic.type }}</p>
+                                        <p><strong>Poster:</strong> {{ comic.poster }}</p>
+                                    </div>
                                     <div class="comic-rating">
                                         <span>Rating: {{ (comic.rating ?? 0).toFixed(1) }} ({{ comic.rating_count ?? 0
                                             }} votes)</span>
@@ -82,9 +109,12 @@
             return {
                 collections: [],
                 newComic: {
+                    poster: '',
                     title: '',
                     publisher: '',
                     description: '',
+                    price: '',
+                    type: '',
                     thumbnail: null
                 },
                 searchQuery: '',
@@ -121,9 +151,12 @@
             },
             addComic() {
                 const formData = new FormData();
+                formData.append('poster', this.newComic.poster);
                 formData.append('title', this.newComic.title);
                 formData.append('publisher', this.newComic.publisher);
                 formData.append('description', this.newComic.description);
+                formData.append('price', this.newComic.price);
+                formData.append('type', this.newComic.type);
                 formData.append('thumbnail', this.newComic.thumbnail);
 
                 axios.post('/api/collections', formData, {
@@ -133,9 +166,12 @@
                 })
                     .then(response => {
                         this.collections.push(response.data);
+                        this.newComic.poster = '';
                         this.newComic.title = '';
                         this.newComic.publisher = '';
                         this.newComic.description = '';
+                        this.newComic.price = '';
+                        this.newComic.type = '';
                         this.newComic.thumbnail = null;
                         this.showForm = false;
                     })
@@ -236,18 +272,18 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .collection .form-group {
+    .add-comic-form .form-group {
         margin-bottom: 15px;
     }
 
-    .collection .form-group label {
+    .add-comic-form .form-group label {
         display: block;
         margin-bottom: 5px;
         font-weight: 600;
         color: #555;
     }
 
-    .collection .form-control {
+    .add-comic-form .form-control {
         width: 100%;
         padding: 10px;
         font-size: 1rem;
@@ -255,18 +291,18 @@
         border-radius: 4px;
     }
 
-    .collection .btn-primary {
+    .add-comic-form .btn-primary {
         background-color: #007bff;
-        color: #fff;
+        border-color: #007bff;
         padding: 10px 20px;
         font-size: 1rem;
-        border: none;
         border-radius: 4px;
         cursor: pointer;
     }
 
-    .collection .btn-primary:hover {
+    .add-comic-form .btn-primary:hover {
         background-color: #0056b3;
+        border-color: #004085;
     }
 
     .collection input[type="text"] {
@@ -280,14 +316,15 @@
 
     .comic-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 20px;
+        padding: 20px;
     }
 
     .comic-card {
         background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         transition: transform 0.2s;
     }
@@ -307,14 +344,14 @@
     }
 
     .comic-info h3 {
-        font-size: 1.25rem;
-        margin-bottom: 10px;
+        margin-top: 0;
+        font-size: 1.5rem;
         color: #333;
     }
 
-    .comic-info p {
-        margin: 0 0 10px;
-        color: #666;
+    .comic-import-info p {
+        margin: 5px 0;
+        color: #555;
     }
 
     .comic-rating {
@@ -324,13 +361,32 @@
     .comic-rating span {
         display: block;
         margin-bottom: 5px;
-        color: #666;
+        font-weight: bold;
+        color: #333;
     }
 
     .comic-rating select {
+        width: 100%;
         padding: 5px;
         border: 1px solid #ccc;
         border-radius: 4px;
+    }
+
+    .btn-info {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #17a2b8;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
     }
 
     .collection .pagination {

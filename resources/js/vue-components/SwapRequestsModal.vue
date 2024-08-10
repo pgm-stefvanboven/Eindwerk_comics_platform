@@ -5,8 +5,6 @@
             <h2>Swap Requests</h2>
             <div v-if="requests.length">
                 <div v-for="request in requests" :key="request.id" class="swap-request">
-                    <p><strong>{{ request.user.name }}</strong> wants to swap their <strong>{{ request.comic.title
-                            }}</strong> for your <strong>{{ request.requestedComic.title }}</strong></p>
                     <button @click="acceptSwap(request)" class="btn btn-success">Accept</button>
                     <button @click="rejectSwap(request)" class="btn btn-danger">Reject</button>
                 </div>

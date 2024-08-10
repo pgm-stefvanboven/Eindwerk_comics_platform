@@ -10,13 +10,15 @@ class SwapController extends Controller
 {
     public function store(Request $request)
     {
+        Log::info('Swap request received:', $request->all());
+
         try {
             $validated = $request->validate([
                 'comic_id' => 'required|exists:comics,id',
                 'requested_comic_id' => 'required|exists:comics,id'
             ]);
 
-            Log::info('Validation passed: ', $validated);
+            Log::info('Validation passed:', $validated);
 
             $swap = Swap::create([
                 'comic_id' => $validated['comic_id'],
@@ -27,6 +29,8 @@ class SwapController extends Controller
             return response()->json(['message' => 'Swap request sent!', 'swap' => $swap]);
         } catch (\Exception $e) {
             Log::error('Error creating swap request: ' . $e->getMessage());
+            Log::info('Comic ID: ' . $request->input('comic_id'));
+            Log::info('Requested Comic ID: ' . $request->input('requested_comic_id'));
             return response()->json(['error' => 'An error occurred while creating the swap request.'], 500);
         }
     }

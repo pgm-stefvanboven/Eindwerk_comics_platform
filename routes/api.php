@@ -6,9 +6,6 @@ use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\SwapController;
-use App\Http\Controllers\ListingController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ChatController;
 
 /*
@@ -48,11 +45,6 @@ Route::post('/swaps', [SwapController::class, 'store']);
 Route::get('/swaps', [SwapController::class, 'index']);
 Route::post('/swaps/{swap}/accept', [SwapController::class, 'accept']);
 Route::post('/swaps/{swap}/reject', [SwapController::class, 'reject']);
-
-// Listing, Message, and Review routes:
-Route::resource('listings', ListingController::class);
-Route::resource('messages', MessageController::class);
-Route::resource('reviews', ReviewController::class);
 
 // Chat routes:
 Route::get('/chats', [ChatController::class, 'index']);

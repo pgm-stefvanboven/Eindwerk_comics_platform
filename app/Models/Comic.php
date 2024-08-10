@@ -10,10 +10,18 @@ class Comic extends Model
     use HasFactory;
 
     protected $fillable = [
+        'poster',
         'title',
+        'price', 
+        'type',
         'publisher',
         'description',
         'thumbnail',
-        'user_id'
+
     ];
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

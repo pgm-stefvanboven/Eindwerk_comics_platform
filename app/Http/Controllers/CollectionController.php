@@ -14,6 +14,7 @@ class CollectionController extends Controller
 
         if ($request->has('search')) {
             $query->where('title', 'LIKE', "%{$request->search}%")
+                ->orWhere('poster', 'LIKE', "%{$request->search}%")
                 ->orWhere('publisher', 'LIKE', "%{$request->search}%")
                 ->orWhere('description', 'LIKE', "%{$request->search}%");
         }
@@ -26,10 +27,13 @@ class CollectionController extends Controller
     {
         try {
             $validated = $request->validate([
+                'poster' => 'required|string|max:255',
                 'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'title' => 'required|string|max:255',
                 'publisher' => 'required|string|max:255',
                 'description' => 'required|string',
+                'price' => 'nullable|numeric',
+                'type' => 'required|in:sale,rent'
             ]);
 
             // Handle file upload
