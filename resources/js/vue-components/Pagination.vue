@@ -16,11 +16,15 @@
             current: {
                 type: Number,
                 required: true
+            },
+            perPage: {
+                type: Number,
+                default: 8 // Set default items per page to 8
             }
         },
         computed: {
             totalPages() {
-                return Math.ceil(this.total / 10);
+                return Math.ceil(this.total / this.perPage);
             }
         },
         methods: {
@@ -44,6 +48,7 @@
         justify-content: center;
         align-items: center;
         margin-top: 20px;
+        margin-bottom: 40px;
     }
 
     .pagination button {

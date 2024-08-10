@@ -30,6 +30,11 @@
                         <div v-else>
                             <p>No comics in your collection yet.</p>
                         </div>
+                        <Pagination :total="total" :current="currentPage" :perPage="perPage"
+                            @page-changed="fetchCollections">
+                        </Pagination>
+
+                        <h2>Rented comics</h2>
                     </div>
                 </div>
             </div>
@@ -42,30 +47,37 @@
     import axios from 'axios';
     import Header from './vue-components/Header.vue';
     import Footer from './vue-components/Footer.vue';
+    import Pagination from './vue-components/Pagination.vue';
 
     export default {
         components: {
             Header,
-            Footer
+            Footer,
+            Pagination
         },
         data() {
             return {
-                collections: []
+                collections: [],
+                total: 0,
+                currentPage: 1,
+                perPage: 8
             };
         },
         mounted() {
-            this.fetchCollections();
+            this.fetchCollections(this.currentPage);
         },
         methods: {
-            fetchCollections() {
-                axios.get('/api/collections')
+            fetchCollections(page = 1) {
+                axios.get(`/api/collections?page=${page}&perPage=${this.perPage}`)
                     .then(response => {
-                        this.collections = response.data;
+                        this.collections = response.data.data;
+                        this.total = response.data.total;
+                        this.currentPage = page;
                     })
                     .catch(error => {
                         console.error("Error fetching collections:", error);
                     });
-            }
+            },
         }
     };
 </script>
@@ -101,7 +113,7 @@
 
     .comic-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
         gap: 20px;
     }
 

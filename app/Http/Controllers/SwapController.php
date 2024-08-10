@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Swap;
+use App\Models\Comic;
 use App\Models\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,13 +22,26 @@ class SwapController extends Controller
 
             Log::info('Validation passed:', $validated);
 
-            $swap = Swap::create([
-                'comic_id' => $validated['comic_id'],
-                'requested_comic_id' => $validated['requested_comic_id'],
-                'status' => 'pending'
-            ]);
+            // Fetch the requested comic
+            $comic = Comic::findOrFail($validated['requested_comic_id']);
 
-            return response()->json(['message' => 'Swap request sent!', 'swap' => $swap]);
+            // Check if there are enough comics available
+            if ($comic->total > 0) {
+                // Decrement the total and save
+                $comic->total -= 1;
+                $comic->save();
+
+                // Create the swap request
+                $swap = Swap::create([
+                    'comic_id' => $validated['comic_id'],
+                    'requested_comic_id' => $validated['requested_comic_id'],
+                    'status' => 'pending'
+                ]);
+
+                return response()->json(['message' => 'Swap request sent!', 'swap' => $swap]);
+            } else {
+                return response()->json(['error' => 'Requested comic is sold out.'], 400);
+            }
         } catch (\Exception $e) {
             Log::error('Error creating swap request: ' . $e->getMessage());
             Log::info('Comic ID: ' . $request->input('comic_id'));

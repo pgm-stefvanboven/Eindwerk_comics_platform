@@ -18,7 +18,7 @@
                                 <label for="poster">Poster</label>
                                 <input v-model="newComic.poster" placeholder="Poster" class="form-control" required>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="title">Title</label>
                                 <input type="text" v-model="newComic.title" class="form-control" id="title" required>
@@ -77,24 +77,38 @@
                                         <p><strong>ID:</strong> {{ comic.id }}</p>
                                         <p><strong>Publisher:</strong> {{ comic.publisher }}</p>
                                         <p>{{ comic.description }}</p>
-                                        <p><strong>Total comics:</strong> {{ comic.total }}</p>
+                                        <p>
+                                            <strong>Total comics: </strong>
+                                            <span v-if="comic.total > 0">{{ comic.total }}</span>
+                                            <span v-else>Sold Out</span>
+                                        </p>
                                         <p><strong>Price:</strong> {{ comic.price }}</p>
                                         <p><strong>Type:</strong> For {{ comic.type }}</p>
                                         <p><strong>Poster:</strong> {{ comic.poster }}</p>
                                     </div>
-                                    <div class="comic-rating">
-                                        <span>Rating: {{ (comic.rating ?? 0).toFixed(1) }} ({{ comic.rating_count ?? 0
-                                            }} votes)</span>
-                                        <select v-model="comic.newRating" @change="updateRating(comic)">
-                                            <option disabled value="">Rate this comic</option>
-                                            <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-                                        </select>
+
+                                    <!-- Disable the request button if the comic is sold out -->
+                                    <div v-if="comic.total > 0">
+                                        <div class="comic-rating">
+                                            <span>Rating: {{ (comic.rating ?? 0).toFixed(1) }} ({{ comic.rating_count ??
+                                                0 }} votes)</span>
+                                            <select v-model="comic.newRating" @change="updateRating(comic)">
+                                                <option disabled value="">Rate this comic</option>
+                                                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+                                            </select>
+                                        </div>
+                                        <button @click="requestSwap(comic)" class="btn btn-info"
+                                            :disabled="comic.swapInProgress">Request Swap</button>
                                     </div>
-                                    <button @click="requestSwap(comic)" class="btn btn-info">Request Swap</button>
+                                    <div v-else>
+                                        <button class="btn btn-secondary" disabled>Sold Out</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <pagination :total="total" :current="currentPage" @page-changed="fetchCollections"></pagination>
+                        <pagination :total="total" :current="currentPage" :perPage="perPage"
+                            @page-changed="fetchCollections">
+                        </pagination>
                     </div>
                 </div>
             </div>
@@ -135,18 +149,19 @@
                 searchQuery: '',
                 currentPage: 1,
                 total: 0,
+                perPage: 8,
                 showForm: false,
                 showSwapRequests: false,
                 swapRequests: []
             }
         },
         mounted() {
-            this.fetchCollections();
+            this.fetchCollections(this.currentPage);
             this.fetchSwapRequests();
         },
         methods: {
             fetchCollections(page = 1) {
-                axios.get(`/api/stores?page=${page}&search=${this.searchQuery}`)
+                axios.get(`/api/stores?page=${page}&perPage=${this.perPage}&search=${this.searchQuery}`)
                     .then(response => {
                         this.collections = response.data.data.map(comic => ({
                             ...comic,
@@ -181,15 +196,20 @@
                     }
                 })
                     .then(response => {
-                        this.collections.push(response.data);
-                        this.newComic.poster = '';
-                        this.newComic.title = '';
-                        this.newComic.publisher = '';
-                        this.newComic.description = '';
-                        this.newComic.total = '';
-                        this.newComic.price = '';
-                        this.newComic.type = '';
-                        this.newComic.thumbnail = null;
+                        // Fetch the comics list again to refresh the UI
+                        this.fetchCollections(this.currentPage);
+
+                        // Reset form fields
+                        this.newComic = {
+                            poster: '',
+                            title: '',
+                            publisher: '',
+                            description: '',
+                            total: '',
+                            price: '',
+                            type: '',
+                            thumbnail: null
+                        };
                         this.showForm = false;
                     })
                     .catch(error => {
@@ -211,21 +231,43 @@
                         console.error("Error updating rating:", error);
                     });
             },
-            requestSwap(comic) {
-                // Ask the user to enter the comic ID they want to offer in return
-                const selectedComicId = prompt('Enter the ID of the comic you want to offer in exchange:');
+            async requestSwap(comic) {
+                try {
+                    if (!this.swapRequests) {
+                        await this.fetchSwapRequests(); // Ensure swap requests are loaded
+                    }
 
-                axios.post('/api/swaps', {
-                    comic_id: selectedComicId,
-                    requested_comic_id: comic.id
-                })
-                    .then(response => {
-                        alert('Swap request sent!');
-                        this.fetchSwapRequests();
-                    })
-                    .catch(error => {
-                        console.error("Error requesting swap:", error);
+                    const selectedComicId = prompt('Enter the ID of the comic you want to offer in exchange:');
+
+                    if (!selectedComicId) return;
+
+                    comic.swapInProgress = true;
+
+                    const response = await axios.post('/api/swaps', {
+                        comic_id: selectedComicId,
+                        requested_comic_id: comic.id
                     });
+
+                    if (response.data.success) {
+                        alert('Swap request sent!');
+                        comic.total = response.data.updated_comic.total;
+
+                        if (comic.total <= 0) {
+                            comic.soldOut = true;
+                        }
+
+                        // Update swap requests synchronously
+                        this.fetchSwapRequests();
+                    } else {
+                        alert('Swap request sent! Relod page to see the changes');
+                    }
+
+                } catch (error) {
+                    console.error("Error requesting swap:", error);
+                    alert('Error sending swap request');
+                } finally {
+                    comic.swapInProgress = false;
+                }
             },
             fetchSwapRequests() {
                 axios.get('/api/swaps')

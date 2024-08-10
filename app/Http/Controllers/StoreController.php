@@ -19,9 +19,11 @@ class StoreController extends Controller
                 ->orWhere('description', 'LIKE', "%{$request->search}%");
         }
 
-        $comics = $query->paginate(10);
+        $perPage = $request->input('perPage', 8); // Default to 8 comics per page
+        $comics = $query->paginate($perPage);
         return response()->json($comics);
     }
+
 
     public function store(Request $request)
     {
@@ -33,7 +35,10 @@ class StoreController extends Controller
                 'publisher' => 'required|string|max:255',
                 'description' => 'required|string',
                 'price' => 'nullable|numeric',
-                'type' => 'required|in:sale,rent'
+                'type' => 'required|in:sale,rent',
+                'total' => 'required|numeric',
+                'rating' => 'nullable|numeric|min:1|max:5',
+                'rating_count' => 'nullable|numeric'
             ]);
 
             // Handle file upload
