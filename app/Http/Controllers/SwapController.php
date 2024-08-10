@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Swap;
+use App\Models\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -46,7 +47,12 @@ class SwapController extends Controller
         $swap->status = 'accepted';
         $swap->save();
 
-        return response()->json(['message' => 'Swap accepted!', 'swap' => $swap]);
+        // Add the requested comic to the collection
+        Collection::create([
+            'comic_id' => $swap->requested_comic_id,
+        ]);
+
+        return response()->json(['message' => 'Swap accepted and comic added to collection!', 'swap' => $swap]);
     }
 
     public function reject(Swap $swap)

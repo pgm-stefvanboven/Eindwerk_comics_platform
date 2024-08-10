@@ -18,20 +18,30 @@
                                 <label for="poster">Poster</label>
                                 <input v-model="newComic.poster" placeholder="Poster" class="form-control" required>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="title">Title</label>
                                 <input type="text" v-model="newComic.title" class="form-control" id="title" required>
                             </div>
+
                             <div class="form-group">
                                 <label for="description">Description</label>
                                 <textarea v-model="newComic.description" class="form-control" id="description"
                                     required></textarea>
                             </div>
+
+                            <div class="form-group">
+                                <label for="total">Total comics</label>
+                                <input v-model="newComic.total" type="number" placeholder="Total comics"
+                                    class="form-control" required>
+                            </div>
+
                             <div class="form-group">
                                 <label for="price">Price</label>
                                 <input v-model="newComic.price" type="number" placeholder="Price" class="form-control"
                                     required>
                             </div>
+
                             <div class="form-group">
                                 <label for="type">Type</label>
                                 <select v-model="newComic.type" class="form-control" required>
@@ -39,16 +49,19 @@
                                     <option value="rent">For Rent</option>
                                 </select>
                             </div>
+
                             <div class="form-group">
                                 <label for="publisher">Publisher</label>
                                 <input type="text" v-model="newComic.publisher" class="form-control" id="publisher"
                                     required>
                             </div>
+
                             <div class="form-group">
                                 <label for="thumbnail">Thumbnail</label>
                                 <input type="file" @change="handleFileUpload" class="form-control" id="thumbnail"
                                     required>
                             </div>
+
                             <button type="submit" class="btn btn-primary newcomic">Add Comic</button>
                         </form>
 
@@ -64,8 +77,9 @@
                                         <p><strong>ID:</strong> {{ comic.id }}</p>
                                         <p><strong>Publisher:</strong> {{ comic.publisher }}</p>
                                         <p>{{ comic.description }}</p>
+                                        <p><strong>Total comics:</strong> {{ comic.total }}</p>
                                         <p><strong>Price:</strong> {{ comic.price }}</p>
-                                        <p><strong>Type:</strong> {{ comic.type }}</p>
+                                        <p><strong>Type:</strong> For {{ comic.type }}</p>
                                         <p><strong>Poster:</strong> {{ comic.poster }}</p>
                                     </div>
                                     <div class="comic-rating">
@@ -113,6 +127,7 @@
                     title: '',
                     publisher: '',
                     description: '',
+                    total: '',
                     price: '',
                     type: '',
                     thumbnail: null
@@ -155,6 +170,7 @@
                 formData.append('title', this.newComic.title);
                 formData.append('publisher', this.newComic.publisher);
                 formData.append('description', this.newComic.description);
+                formData.append('total', this.newComic.total);
                 formData.append('price', this.newComic.price);
                 formData.append('type', this.newComic.type);
                 formData.append('thumbnail', this.newComic.thumbnail);
@@ -170,6 +186,7 @@
                         this.newComic.title = '';
                         this.newComic.publisher = '';
                         this.newComic.description = '';
+                        this.newComic.total = '';
                         this.newComic.price = '';
                         this.newComic.type = '';
                         this.newComic.thumbnail = null;

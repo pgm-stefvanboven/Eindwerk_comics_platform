@@ -14,6 +14,7 @@ class Comic extends Model
         'title',
         'price', 
         'type',
+        'total',
         'publisher',
         'description',
         'thumbnail',

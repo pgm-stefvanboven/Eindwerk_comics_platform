@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\SwapController;
 use App\Http\Controllers\ChatController;
 
@@ -35,10 +36,13 @@ Route::post('/topics/{topicId}/replies', [ReplyController::class, 'store']);
 Route::put('/replies/{id}', [ReplyController::class, 'update']);
 Route::delete('/replies/{id}', [ReplyController::class, 'destroy']);
 
-// Collection routes:
+// Store routes:
 Route::get('/stores', [StoreController::class, 'index']);
 Route::post('/stores', [StoreController::class, 'store']);
 Route::patch('/stores/{id}/rating', [StoreController::class, 'updateRating']);
+
+// Collection routes:
+Route::get('/collections', [CollectionController::class, 'index']);
 
 // Swap routes:
 Route::post('/swaps', [SwapController::class, 'store']);

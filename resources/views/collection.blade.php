@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComicVerse - Store</title>
+    <title>ComicVerse - Collection</title>
 </head>
 <body>
     @vite('resources/css/app.css')

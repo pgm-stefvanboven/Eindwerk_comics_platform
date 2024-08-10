@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('thumbnail')->nullable();
             $table->string('title');
             $table->text('description')->nullable();
+            $table->number('total')->nullable();
             $table->decimal('price', 8, 2)->nullable();
             $table->enum('type', ['sale', 'rent']);
             $table->string('publisher');
