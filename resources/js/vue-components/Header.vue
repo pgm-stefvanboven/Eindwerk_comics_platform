@@ -11,7 +11,7 @@
           <li><router-link to="/characters" class="nav-item text">Characters</router-link></li>
           <li><router-link to="/wishlist" class="nav-item text">Wishlist</router-link></li>
           <li><router-link to="/community" class="nav-item text">Community</router-link></li>
-          <li><router-link to="/collection" class="nav-item text">Collection</router-link></li>
+          <li><router-link to="/store" class="nav-item text">Store</router-link></li>
         </ul>
       </nav>
       <div v-if="searchResults.length > 0" class="search-results">

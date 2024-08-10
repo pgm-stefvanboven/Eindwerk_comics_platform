@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Comic;
 use Illuminate\Support\Facades\Log;
 
-class CollectionController extends Controller
+class StoreController extends Controller
 {
     public function index(Request $request)
     {

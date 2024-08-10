@@ -7,9 +7,9 @@
 </head>
 <body>
     @vite('resources/css/app.css')
-    <div id="collection">
+    <div id="store">
 
     </div>
-    @vite('resources/js/collection.js')
+    @vite('resources/js/store.js')
 </body>
 </html>
