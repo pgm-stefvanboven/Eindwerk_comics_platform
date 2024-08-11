@@ -10,18 +10,30 @@ class StoreController extends Controller
 {
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        $perPage = $request->input('perPage', 8);
+
+        $salePage = $request->input('salePage', 1);
+        $rentPage = $request->input('rentPage', 1);
+
         $query = Comic::query();
 
-        if ($request->has('search')) {
-            $query->where('title', 'LIKE', "%{$request->search}%")
-                ->orWhere('poster', 'LIKE', "%{$request->search}%")
-                ->orWhere('publisher', 'LIKE', "%{$request->search}%")
-                ->orWhere('description', 'LIKE', "%{$request->search}%");
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('poster', 'LIKE', "%{$search}%")
+                    ->orWhere('publisher', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
+            });
         }
 
-        $perPage = $request->input('perPage', 8); // Default to 8 comics per page
-        $comics = $query->paginate($perPage);
-        return response()->json($comics);
+        $comicsForSale = (clone $query)->where('type', 'sale')->paginate($perPage, ['*'], 'salePage', $salePage);
+        $comicsForRent = (clone $query)->where('type', 'rent')->paginate($perPage, ['*'], 'rentPage', $rentPage);
+
+        return response()->json([
+            'sale' => $comicsForSale,
+            'rent' => $comicsForRent,
+        ]);
     }
 
 

@@ -65,10 +65,12 @@
                             <button type="submit" class="btn btn-primary newcomic">Add Comic</button>
                         </form>
 
-                        <input type="text" v-model="searchQuery" @input="fetchCollections"
+                        <input type="text" v-model="searchQuery" @input="fetchCollections(1)"
                             placeholder="Search comics...">
-                        <div v-if="collections.length" class="comic-grid">
-                            <div v-for="comic in collections" :key="comic.id" class="comic-card">
+
+                        <h2>Comics for Sale</h2>
+                        <div v-if="comicsForSale.length" class="comic-grid">
+                            <div v-for="comic in comicsForSale" :key="comic.id" class="comic-card">
                                 <img v-if="comic.thumbnail" :src="`/storage/${comic.thumbnail}`" alt="Comic thumbnail"
                                     class="comic-thumbnail">
                                 <div class="comic-info">
@@ -87,11 +89,12 @@
                                         <p><strong>Poster:</strong> {{ comic.poster }}</p>
                                     </div>
 
-                                    <!-- Disable the request button if the comic is sold out -->
                                     <div v-if="comic.total > 0">
                                         <div class="comic-rating">
-                                            <span>Rating: {{ (comic.rating ?? 0).toFixed(1) }} ({{ comic.rating_count ??
-                                                0 }} votes)</span>
+                                            <span>
+                                                Rating: {{ Number(comic.rating ?? 0).toFixed(1) }} ({{
+                                                comic.rating_count ?? 0 }} votes)
+                                            </span>
                                             <select v-model="comic.newRating" @change="updateRating(comic)">
                                                 <option disabled value="">Rate this comic</option>
                                                 <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
@@ -106,9 +109,59 @@
                                 </div>
                             </div>
                         </div>
-                        <pagination :total="total" :current="currentPage" :perPage="perPage"
-                            @page-changed="fetchCollections">
-                        </pagination>
+                        <div v-else>
+                            <p>No comics for sale available.</p>
+                        </div>
+                        <pagination :total="totalSale" :current="currentPageSale" :perPage="perPage"
+                            @page-changed="page => fetchCollections(page, 'sale')" />
+
+                        <h2>Comics for Rent</h2>
+                        <div v-if="comicsForRent.length" class="comic-grid">
+                            <div v-for="comic in comicsForRent" :key="comic.id" class="comic-card">
+                                <img v-if="comic.thumbnail" :src="`/storage/${comic.thumbnail}`" alt="Comic thumbnail"
+                                    class="comic-thumbnail">
+                                <div class="comic-info">
+                                    <h3>{{ comic.title }}</h3>
+                                    <div class="comic-import-info">
+                                        <p><strong>ID:</strong> {{ comic.id }}</p>
+                                        <p><strong>Publisher:</strong> {{ comic.publisher }}</p>
+                                        <p>{{ comic.description }}</p>
+                                        <p>
+                                            <strong>Total comics: </strong>
+                                            <span v-if="comic.total > 0">{{ comic.total }}</span>
+                                            <span v-else>Not Available</span>
+                                        </p>
+                                        <p><strong>Price:</strong> {{ comic.price }}</p>
+                                        <p><strong>Type:</strong> For {{ comic.type }}</p>
+                                        <p><strong>Poster:</strong> {{ comic.poster }}</p>
+                                    </div>
+
+                                    <div v-if="comic.total > 0">
+                                        <div class="comic-rating">
+                                            <span>
+                                                Rating: {{ Number(comic.rating ?? 0).toFixed(1) }} ({{
+                                                comic.rating_count ?? 0 }} votes)
+                                            </span>
+                                            <select v-model="comic.newRating" @change="updateRating(comic)">
+                                                <option disabled value="">Rate this comic</option>
+                                                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+                                            </select>
+                                        </div>
+                                        <button @click="requestSwap(comic)" class="btn btn-info"
+                                            :disabled="comic.swapInProgress">Request Swap</button>
+                                    </div>
+                                    <div v-else>
+                                        <button class="btn btn-secondary" disabled>Not Available</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <p class="import-message">No comics for rent available.</p>
+                        </div>
+
+                        <pagination :total="totalRent" :current="currentPageRent" :perPage="perPage"
+                            @page-changed="page => fetchCollections(page, 'rent')" />
                     </div>
                 </div>
             </div>
@@ -135,7 +188,8 @@
         },
         data() {
             return {
-                collections: [],
+                comicsForSale: [],
+                comicsForRent: [],
                 newComic: {
                     poster: '',
                     title: '',
@@ -147,29 +201,33 @@
                     thumbnail: null
                 },
                 searchQuery: '',
-                currentPage: 1,
-                total: 0,
+                currentPageSale: 1,
+                currentPageRent: 1,
+                totalSale: 0,
+                totalRent: 0,
                 perPage: 8,
                 showForm: false,
                 showSwapRequests: false,
                 swapRequests: []
-            }
+            };
         },
         mounted() {
-            this.fetchCollections(this.currentPage);
+            this.fetchCollections(1);
             this.fetchSwapRequests();
         },
         methods: {
-            fetchCollections(page = 1) {
-                axios.get(`/api/stores?page=${page}&perPage=${this.perPage}&search=${this.searchQuery}`)
+            fetchCollections(page = 1, type = null) {
+                const salePage = type === 'sale' || !type ? page : this.currentPageSale;
+                const rentPage = type === 'rent' || !type ? page : this.currentPageRent;
+
+                axios.get(`/api/stores?search=${this.searchQuery}&perPage=${this.perPage}&salePage=${salePage}&rentPage=${rentPage}`)
                     .then(response => {
-                        this.collections = response.data.data.map(comic => ({
-                            ...comic,
-                            rating: Number(comic.rating) || 0,
-                            rating_count: comic.rating_count ?? 0
-                        }));
-                        this.total = response.data.total;
-                        this.currentPage = response.data.current_page;
+                        this.comicsForSale = response.data.sale.data;
+                        this.comicsForRent = response.data.rent.data;
+                        this.totalSale = response.data.sale.total;
+                        this.totalRent = response.data.rent.total;
+                        this.currentPageSale = response.data.sale.current_page;
+                        this.currentPageRent = response.data.rent.current_page;
                     })
                     .catch(error => {
                         console.error("Error fetching collections:", error);
@@ -196,25 +254,33 @@
                     }
                 })
                     .then(response => {
-                        // Fetch the comics list again to refresh the UI
-                        this.fetchCollections(this.currentPage);
+                        const newComic = response.data;
+                        if (newComic.type === 'sale') {
+                            this.comicsForSale.unshift(newComic);
+                            this.totalSale++;
+                        } else if (newComic.type === 'rent') {
+                            this.comicsForRent.unshift(newComic);
+                            this.totalRent++;
+                        }
 
-                        // Reset form fields
-                        this.newComic = {
-                            poster: '',
-                            title: '',
-                            publisher: '',
-                            description: '',
-                            total: '',
-                            price: '',
-                            type: '',
-                            thumbnail: null
-                        };
-                        this.showForm = false;
+                        this.resetForm();
                     })
                     .catch(error => {
                         console.error("Error adding comic:", error);
                     });
+            },
+            resetForm() {
+                this.newComic = {
+                    poster: '',
+                    title: '',
+                    publisher: '',
+                    description: '',
+                    total: '',
+                    price: '',
+                    type: '',
+                    thumbnail: null
+                };
+                this.showForm = false;
             },
             updateRating(comic) {
                 if (!comic.newRating) {
@@ -259,7 +325,7 @@
                         // Update swap requests synchronously
                         this.fetchSwapRequests();
                     } else {
-                        alert('Swap request sent! Relod page to see the changes');
+                        alert('Swap request sent! Reload the page to see the changes');
                     }
 
                 } catch (error) {
@@ -292,6 +358,13 @@
 
     .collection h1 {
         font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .collection h2 {
+        font-size: 2rem;
         text-align: center;
         margin-bottom: 20px;
         color: #333;
@@ -521,5 +594,10 @@
 
     .newcomic {
         margin-top: 10px;
+    }
+
+    .import-message {
+        text-align: center;
+        color: #666;
     }
 </style>
