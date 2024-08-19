@@ -61,18 +61,29 @@
                         this.swaps = response.data;
                     })
                     .catch(error => {
-                        console.error("Error fetching swaps:", error);
+                        console.error("Error fetching swaps:", error.response ? error.response.data : error.message);
                     });
             },
             acceptSwap(swapId) {
                 axios.post(`/api/swaps/${swapId}/accept`)
                     .then(response => {
                         alert(response.data.message);
+
+                        if (response.data.is_rental) {
+                            this.addRentedComic(response.data.rentedComic);
+                        }
+
                         this.fetchSwaps(); // Refresh the swaps list
                     })
                     .catch(error => {
                         console.error("Error accepting swap:", error);
                     });
+            },
+            addRentedComic(comic) {
+                this.collections.push({
+                    ...comic,
+                    rentalEndDate: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000) // 5 days from now
+                });
             },
             rejectSwap(swapId) {
                 axios.post(`/api/swaps/${swapId}/reject`)

@@ -147,8 +147,8 @@
                                                 <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
                                             </select>
                                         </div>
-                                        <button @click="requestSwap(comic)" class="btn btn-info"
-                                            :disabled="comic.swapInProgress">Request Swap</button>
+                                        <button @click="requestSwap(comic, true)" class="btn btn-info"
+                                            :disabled="comic.swapInProgress">Request Rental</button>
                                     </div>
                                     <div v-else>
                                         <button class="btn btn-secondary" disabled>Not Available</button>
@@ -297,7 +297,7 @@
                         console.error("Error updating rating:", error);
                     });
             },
-            async requestSwap(comic) {
+            async requestSwap(comic, isRental = false) {
                 try {
                     if (!this.swapRequests) {
                         await this.fetchSwapRequests(); // Ensure swap requests are loaded
@@ -305,32 +305,32 @@
 
                     const selectedComicId = prompt('Enter the ID of the comic you want to offer in exchange:');
 
-                    if (!selectedComicId) return;
+                    if (!selectedComicId && !isRental) return;
 
                     comic.swapInProgress = true;
 
                     const response = await axios.post('/api/swaps', {
                         comic_id: selectedComicId,
-                        requested_comic_id: comic.id
+                        requested_comic_id: comic.id,
+                        is_rental: isRental
                     });
 
                     if (response.data.success) {
-                        alert('Swap request sent!');
+                        alert(isRental ? 'Rental request sent!' : 'Swap request sent!');
                         comic.total = response.data.updated_comic.total;
 
                         if (comic.total <= 0) {
                             comic.soldOut = true;
                         }
 
-                        // Update swap requests synchronously
                         this.fetchSwapRequests();
                     } else {
-                        alert('Swap request sent! Reload the page to see the changes');
+                        alert('Request sent! Reload the page to see the changes');
                     }
 
                 } catch (error) {
-                    console.error("Error requesting swap:", error);
-                    alert('Error sending swap request');
+                    console.error("Error sending request:", error);
+                    alert('Error sending request');
                 } finally {
                     comic.swapInProgress = false;
                 }

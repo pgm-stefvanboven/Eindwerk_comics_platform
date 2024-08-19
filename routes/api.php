@@ -42,7 +42,9 @@ Route::post('/stores', [StoreController::class, 'store']);
 Route::patch('/stores/{id}/rating', [StoreController::class, 'updateRating']);
 
 // Collection routes:
-Route::get('/collections', [CollectionController::class, 'index']);
+Route::get('/collections/purchased', [CollectionController::class, 'getPurchasedComics']);
+Route::get('/collections/rented', [CollectionController::class, 'getRentedComics']);
+
 
 // Swap routes:
 Route::post('/swaps', [SwapController::class, 'store']);

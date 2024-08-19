@@ -11,6 +11,11 @@ class Collection extends Model
 
     protected $fillable = [
         'comic_id',
+        'rental_end_date'
+    ];
+
+    protected $dates = [
+        'rental_end_date',
     ];
 
     public function comic()

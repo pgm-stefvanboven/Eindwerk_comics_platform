@@ -12,5 +12,7 @@ class Swap extends Model
     protected $fillable = [
         'comic_id',
         'requested_comic_id',
+        'status',
+        'is_rental'  // Add this field
     ];
 }
