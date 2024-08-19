@@ -17,7 +17,9 @@
                                 <img v-if="item.comic.thumbnail" :src="`/storage/${item.comic.thumbnail}`"
                                     alt="Comic thumbnail" class="comic-thumbnail">
                                 <div class="comic-info">
-                                    <h3>{{ item.comic.title }}</h3>
+                                    <router-link :to="{ name: 'collectionDetail', params: { id: item.comic.id } }">
+                                        <h3>{{ item.comic.title }}</h3>
+                                    </router-link>
                                     <div class="comic-details">
                                         <p><strong>ID:</strong> {{ item.comic.id }}</p>
                                         <p><strong>Publisher:</strong> {{ item.comic.publisher }}</p>
@@ -43,7 +45,9 @@
                                 <img v-if="item.comic.thumbnail" :src="`/storage/${item.comic.thumbnail}`"
                                     alt="Comic thumbnail" class="comic-thumbnail">
                                 <div class="comic-info">
-                                    <h3>{{ item.comic.title }}</h3>
+                                    <router-link :to="{ name: 'collectionDetail', params: { id: item.comic.id } }">
+                                        <h3>{{ item.comic.title }}</h3>
+                                    </router-link>
                                     <div class="comic-details">
                                         <p><strong>ID:</strong> {{ item.comic.id }}</p>
                                         <p><strong>Publisher:</strong> {{ item.comic.publisher }}</p>

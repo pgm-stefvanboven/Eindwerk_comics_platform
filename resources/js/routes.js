@@ -7,6 +7,7 @@ import CharacterDetail from "./CharacterDetail.vue";
 import WishlistPage from "./Wishlist.vue";
 import CommunityPage from "./Community.vue";
 import CollectionPage from "./Collection.vue";
+import CollectionDetailPage from "./CollectionDetail.vue";
 import StorePage from "./Store.vue";
 import SwapRequestPage from "./SwapRequest.vue";
 
@@ -49,9 +50,15 @@ const routes = [
         component: CommunityPage,
     },
     {
-        name: "CollectionPage",
+        name: "collection",
         path: "/collection",
         component: CollectionPage,
+    },
+    {
+        path: "/collection/:id",
+        name: "collectionDetail",
+        component: CollectionDetailPage,
+        props: true,
     },
     {
         name: "StorePage",

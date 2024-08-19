@@ -13,6 +13,6 @@ class Swap extends Model
         'comic_id',
         'requested_comic_id',
         'status',
-        'is_rental'  // Add this field
+        'is_rental'
     ];
 }

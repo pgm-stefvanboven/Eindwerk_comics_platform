@@ -325,7 +325,7 @@
 
                         this.fetchSwapRequests();
                     } else {
-                        alert('Request sent! Reload the page to see the changes');
+                        alert('Request sent! Go to the requests page to see your request.');
                     }
 
                 } catch (error) {

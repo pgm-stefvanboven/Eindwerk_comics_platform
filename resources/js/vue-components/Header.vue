@@ -2,18 +2,41 @@
   <header class="header">
     <div class="container">
       <nav class="nav">
-        <h1 class="logo">
-          <a href="/" class="logo-link">Marvel Comic Universe</a>
-        </h1>
-        <input type="text" placeholder="Search" class="search-input" v-model="searchQuery" @input="search" />
+        <div class="nav-left">
+          <h1 class="logo">
+            <a href="/" class="logo-link">Marvel Comic Universe</a>
+          </h1>
+          <input type="text" placeholder="Search" class="search-input" v-model="searchQuery" @input="search" />
+        </div>
+        <div class="nav-right">
+          <ul class="nav-list">
+            <li><router-link to="/comics" class="nav-item text">Comics</router-link></li>
+            <li><router-link to="/characters" class="nav-item text">Characters</router-link></li>
+            <li><router-link to="/community" class="nav-item text">Community</router-link></li>
+            <li><router-link to="/store" class="nav-item text">Store</router-link></li>
+            <li><router-link to="/swap-request" class="nav-item text">Requests</router-link></li>
+            <li class="dropdown">
+              <a href="#" class="nav-item text dropdown-toggle">More</a>
+              <ul class="dropdown-menu">
+                <li><router-link to="/wishlist" class="nav-item text">Wishlist</router-link></li>
+                <li><router-link to="/collection" class="nav-item text">My Collection</router-link></li>
+              </ul>
+            </li>
+          </ul>
+          <button class="menu-toggle" @click="toggleMenu">☰</button>
+        </div>
+      </nav>
+      <div v-if="isMenuOpen" class="mobile-menu">
         <ul class="nav-list">
           <li><router-link to="/comics" class="nav-item text">Comics</router-link></li>
           <li><router-link to="/characters" class="nav-item text">Characters</router-link></li>
           <li><router-link to="/wishlist" class="nav-item text">Wishlist</router-link></li>
           <li><router-link to="/community" class="nav-item text">Community</router-link></li>
           <li><router-link to="/store" class="nav-item text">Store</router-link></li>
+          <li><router-link to="/swap-request" class="nav-item text">Requests</router-link></li>
+          <li><router-link to="/collection" class="nav-item text">My Collection</router-link></li>
         </ul>
-      </nav>
+      </div>
       <div v-if="searchResults.length > 0" class="search-results">
         <ul>
           <li v-for="result in searchResults" :key="result.id">
@@ -35,7 +58,8 @@
         isLoggedIn: false,
         username: null, // Username of logged in user
         searchQuery: '', // Query entered in the search input
-        searchResults: [] // Search results to be displayed
+        searchResults: [], // Search results to be displayed
+        isMenuOpen: false // Mobile menu toggle
       };
     },
     created() {
@@ -78,6 +102,9 @@
             console.error('Error logging out:', error);
           });
       },
+      toggleMenu() {
+        this.isMenuOpen = !this.isMenuOpen;
+      },
       search() {
         if (this.searchQuery.length < 1) {
           this.searchResults = [];
@@ -115,8 +142,7 @@
 <style scoped>
   .header {
     background-color: #d97706;
-    padding-top: 1rem;
-    padding-bottom: 0.8rem;
+    padding: 1rem 0.8rem;
     position: relative;
   }
 
@@ -125,13 +151,24 @@
     margin: 0 auto;
     padding: 0 20px;
     position: relative;
-    /* Added */
   }
 
   .nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
 
   .logo {
@@ -157,40 +194,6 @@
     background-color: #fee4c7;
   }
 
-  .search-results {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    top: 100%;
-    background-color: #fee4c7;
-    border: 1px solid #fff6eb;
-    width: 100%;
-    max-width: 600px;
-    margin-top: 10px;
-    z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .search-results ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .search-results li {
-    padding: 10px;
-    border-bottom: 1px solid #fff6eb;
-  }
-
-  .search-results li a {
-    text-decoration: none;
-    color: #333;
-  }
-
-  .search-results li:hover {
-    background-color: #fff6eb;
-  }
-
   .nav-list {
     display: flex;
     gap: 1rem;
@@ -213,52 +216,114 @@
     font-size: 1.5rem;
   }
 
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1.875rem;
+    cursor: pointer;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
   /* Media query 768px */
   @media (max-width: 768px) {
-    .nav {
-      flex-direction: column;
-      align-items: flex-start;
+    .nav-right {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: block;
+    }
+
+    .mobile-menu {
+      display: block;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: #d97706;
+      width: 100%;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
     }
 
     .nav-list {
       flex-direction: column;
       gap: 0.75rem;
     }
+  }
 
-    .search-input {
-      width: 100%;
-      margin-bottom: 1rem;
+  /* Media query 480px */
+  @media (max-width: 480px) {
+    .logo {
+      font-size: 1.5rem;
     }
 
-    .logo {
-      margin-bottom: 1rem;
+    .text {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Dropdown styles */
+  .dropdown {
+    position: relative;
+  }
+
+  .dropdown-toggle {
+    cursor: pointer;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    text-align: center;
+    top: 100%;
+    left: -70px;
+    background-color: #d97706;
+    padding: 0.5rem 0;
+    list-style-type: none;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .dropdown-menu li {
+    padding: 0.5rem 1rem;
+  }
+
+  .dropdown-menu li a {
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+  }
+
+  .dropdown-menu li a:hover {
+    color: #fbbf24;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+
+  /* Media query 768px */
+  @media (max-width: 768px) {
+    .dropdown-menu {
+      position: static;
+      box-shadow: none;
+    }
+
+    .dropdown:hover .dropdown-menu {
+      display: none;
     }
   }
 
   /* Media query 480px */
   @media (max-width: 480px) {
-    .nav {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .nav-list {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .search-input {
-      width: 100%;
-      margin-bottom: 0.75rem;
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .text {
-      font-size: 1.25rem;
+    .dropdown-menu li {
+      padding: 0.5rem;
     }
   }
 </style>

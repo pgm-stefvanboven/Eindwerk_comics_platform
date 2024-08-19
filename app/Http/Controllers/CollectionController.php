@@ -4,9 +4,58 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Collection;
+use App\Models\Comic;
+use App\Models\ComicNote;
+use Illuminate\Support\Facades\Log; // Add this line
+
 
 class CollectionController extends Controller
 {
+
+    public function getComicById($id)
+    {
+        $comic = Comic::findOrFail($id);
+        $note = ComicNote::where('comic_id', $id)->first();
+
+        return response()->json([
+            'comic' => $comic,
+            'note' => $note
+        ]);
+    }
+
+    // Store or update a note for a specific comic
+    public function storeOrUpdateNote(Request $request, $comicId)
+    {
+        $validated = $request->validate([
+            'note' => 'required|string',
+        ]);
+
+        $note = ComicNote::updateOrCreate(
+            [
+                'comic_id' => $comicId,
+            ],
+            [
+                'note' => $validated['note'],
+            ]
+        );
+
+        return response()->json($note, 200);
+    }
+
+    // Delete a note
+    public function deleteNote(Request $request, $comicId)
+    {
+        $note = ComicNote::where('comic_id', $comicId)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if ($note) {
+            $note->delete();
+            return response()->json(['message' => 'Note deleted successfully'], 200);
+        }
+
+        return response()->json(['message' => 'Note not found'], 404);
+    }
 
     public function getPurchasedComics(Request $request)
     {
