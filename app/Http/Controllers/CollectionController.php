@@ -45,9 +45,9 @@ class CollectionController extends Controller
     // Delete a note
     public function deleteNote(Request $request, $comicId)
     {
-        $note = ComicNote::where('comic_id', $comicId)
-            ->where('user_id', $request->user()->id)
-            ->first();
+        $noteQuery = ComicNote::where('comic_id', $comicId);
+
+        $note = $noteQuery->first();
 
         if ($note) {
             $note->delete();
